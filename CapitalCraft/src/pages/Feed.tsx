@@ -106,8 +106,8 @@ export default function Feed() {
             <div className="flex items-center gap-3">
               {/* Create Post Button */}
               <button
-                onClick={() => alert("Create Post functionality not implemented yet.")}
-                className="group px-5 py-2.5 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-lg hover:from-red-500 hover:to-red-400 transition-all duration-300 shadow-lg shadow-red-500/25 hover:shadow-red-500/40 hover:scale-105 flex items-center gap-2"
+                onClick={() => window.location.href = "/create-post"}
+                className="group px-5 py-2.5 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-lg hover:from-red-500 hover:to-red-400 transition-all duration-300 shadow-lg shadow-red-500/25 hover:shadow-red-500/40 hover:scale-105 flex items-center gap-2 cursor-pointer"
               >
                 <Plus className="w-4 h-4 group-hover:rotate-90 transition-transform" />
                 <span className="font-semibold">Create Post</span>

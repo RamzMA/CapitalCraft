@@ -1,5 +1,6 @@
 import Login from "./pages/Login";
 import Feed from "./pages/Feed";
+import CreatePost from "./pages/CreatePost";
 import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 
 export default function App() {
@@ -10,6 +11,7 @@ export default function App() {
         <Route path="/" element={<Navigate to="/login" />} />
         <Route path="/login" element={<Login />} />
         <Route path="/feed" element={<Feed />} />
+        <Route path="/create-post" element={<CreatePost />} />
       </Routes>
     </BrowserRouter>
   );

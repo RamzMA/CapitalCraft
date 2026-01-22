@@ -219,7 +219,7 @@ export default function Login() {
 
         <button
           onClick={() => setAccountStatus(!accountStatus)}
-          className="w-full py-3 rounded-lg bg-gray-700 text-white font-semibold hover:bg-gray-600 transition"
+          className="w-full py-3 rounded-lg bg-gray-700 text-white font-semibold hover:bg-gray-600 transition cursor-pointer"
         >
           {accountStatus ? "Switch to Login" : "Switch to Sign Up"}
         </button>
