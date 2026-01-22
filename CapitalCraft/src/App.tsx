@@ -1,7 +1,7 @@
 import Login from "./pages/Login";
 import Feed from "./pages/Feed";
-import CreatePost from "./pages/CreatePost";
 import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
+import { CreatePost } from "./pages/CreatePost";
 
 export default function App() {
 
