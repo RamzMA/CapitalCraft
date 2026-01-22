@@ -212,7 +212,7 @@ export default function Login() {
         />
         <button
           onClick={accountStatus ? handleRegister : handleLogin}
-          className="w-full py-3 rounded-lg bg-red-500 text-white font-semibold hover:bg-red-600 transition mb-3"
+          className="w-full py-3 rounded-lg bg-red-500 text-white font-semibold hover:bg-red-600 transition mb-3 cursor-pointer"
         >
           {accountStatus ? "Sign Up" : "Login"}
         </button>
