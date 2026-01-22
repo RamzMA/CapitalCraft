@@ -1,4 +1,5 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Text, UniqueConstraint
+from sqlalchemy import Column, Integer, String, ForeignKey, Text, UniqueConstraint, DateTime
+from datetime import datetime
 from database import Base
 from sqlalchemy.orm import relationship
 
@@ -18,6 +19,11 @@ class Post(Base):
     id = Column(Integer, primary_key=True, index=True)
     content = Column(Text)
     user_id = Column(Integer, ForeignKey("users.id"))
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    author = relationship("User")
+
+
 
 #Relationship for Comments
 class Comment(Base):

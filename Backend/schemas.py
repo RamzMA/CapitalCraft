@@ -1,4 +1,6 @@
 from pydantic import BaseModel
+from sqlalchemy.sql.sqltypes import DateTime
+from datetime import datetime
 
 #Schemas for User creation and login
 class UserCreate(BaseModel):
@@ -33,5 +35,16 @@ class CommentOut(BaseModel):
     post_id: int
 
     #Easy conversion from ORM objects for sqlalchemy as post creation
+    class Config:
+        orm_mode = True
+
+
+#Schema for Post feed output with author email and timestamp
+class PostFeedOut(BaseModel):
+    id: int
+    content: str
+    author_email: str
+    created_at: datetime
+
     class Config:
         orm_mode = True

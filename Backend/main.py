@@ -2,9 +2,11 @@ from fastapi import FastAPI, Depends, HTTPException
 from database import engine, SessionLocal
 import models
 from sqlalchemy.orm import Session
-from schemas import UserCreate, UserLogin, PostCreate, PostOut, CommentCreate, CommentOut
+from schemas import PostFeedOut, UserCreate, UserLogin, PostCreate, PostOut, CommentCreate, CommentOut
 from auth import hash_password, verify_password, create_access_token, get_current_user
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import DateTime
+from datetime import datetime
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -111,10 +113,20 @@ def create_post(
     return new_post
 
 #Get all posts
-@app.get("/posts", response_model=list[PostOut])
+@app.get("/posts", response_model=list[PostFeedOut])
 def get_posts(db: Session = Depends(get_db)):
-    posts = db.query(models.Post).all()
-    return posts
+    posts = db.query(models.Post).order_by(models.Post.created_at.desc()).all()
+
+    return [
+        {
+            "id": post.id,
+            "content": post.content,
+            "author_email": post.author.email,
+            "created_at": post.created_at,
+        }
+        for post in posts
+    ]
+
 
 #Create a comment
 @app.post("/posts/{post_id}/comments", response_model=CommentOut)
@@ -177,3 +189,25 @@ def get_post_meta(
         "comments": comments,
         "likes_count": likes_count
     }
+
+
+#delete post
+@app.delete("/posts/{post_id}")
+def delete_post(
+    post_id: int,
+    user_id: int = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    post = db.query(models.Post).filter(models.Post.id == post_id).first()
+
+    if not post:
+        raise HTTPException(status_code=404, detail="Post not found")
+
+    # only author can delete
+    if post.user_id != user_id:
+        raise HTTPException(status_code=403, detail="Not allowed")
+
+    db.delete(post)
+    db.commit()
+
+    return {"message": "Post deleted"}
