@@ -82,6 +82,7 @@ This is **not a tutorial clone** — it is an evolving, real-world application d
 ## 📸 Screenshots
 Login/Register Page
 <img width="1918" height="952" alt="Screenshot 2026-01-22 at 08 06 11" src="https://github.com/user-attachments/assets/6db32c1c-21e0-492c-b6b9-78bee63d38ab" />
+Secure login and registration interface for CapitalCraft, featuring JWT-based authentication and a responsive React + Tailwind UI.
 
 *(Coming soon)*
 
