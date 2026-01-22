@@ -1,6 +1,7 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { motion } from "motion/react"
 import { useNavigate } from "react-router-dom"
+
 
 
 export default function Login() {
@@ -66,6 +67,35 @@ export default function Login() {
     setError("Backend not reachable");
   }
 };
+
+    // Remember Me functionality
+    const [rememberMe, setRememberMe] = useState<boolean>(false);
+
+   const toggleRememberMe = () => {
+    const newValue = !rememberMe
+    setRememberMe(newValue)
+
+    if (newValue) {
+        localStorage.setItem("rememberedEmail", email)
+    } else {
+        localStorage.removeItem("rememberedEmail")
+    }
+    }
+
+    useEffect(() => {
+    if (rememberMe) {
+        localStorage.setItem("rememberedEmail", email)
+    }
+    }, [email, rememberMe])
+
+    useEffect(() => {
+    const savedEmail = localStorage.getItem("rememberedEmail")
+    if (savedEmail) {
+        setEmail(savedEmail)
+        setRememberMe(true)
+    }
+    }, [])
+
 
 
   return (
@@ -218,9 +248,17 @@ export default function Login() {
         </button>
 
         <button
+            onClick={toggleRememberMe}
+            className="absolute top-4 right-4 w-5 h-5 border-2 border-gray-400 rounded-sm flex items-center justify-center cursor-pointer"
+        >
+          {rememberMe && <div className="w-3 h-3 bg-red-500"></div>}
+        </button>
+
+        <button
           onClick={() => setAccountStatus(!accountStatus)}
           className="w-full py-3 rounded-lg bg-gray-700 text-white font-semibold hover:bg-gray-600 transition cursor-pointer"
         >
+        
           {accountStatus ? "Switch to Login" : "Switch to Sign Up"}
         </button>
       </motion.div>

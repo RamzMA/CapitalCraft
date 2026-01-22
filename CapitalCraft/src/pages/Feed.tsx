@@ -76,7 +76,7 @@ export default function Feed() {
   function toggleProfileMenu() {
     setProfileMenuOpen(!profileMenuOpen)
   }
-
+  
   return (
     <div className="min-h-screen bg-black">
       {/* Header with gradient backdrop */}
