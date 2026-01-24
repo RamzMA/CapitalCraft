@@ -1,7 +1,16 @@
+# Backend/requirements.txt
 fastapi
-uvicorn
+uvicorn[standard]
+
+# Database
 sqlalchemy
 pydantic
 python-dotenv
+
+# Auth & Security
+python-jose[cryptography]
 passlib[bcrypt]
-python-jose
+bcrypt==3.2.2
+
+# CORS
+starlette

@@ -1,8 +1,9 @@
 from fastapi import FastAPI, Depends, HTTPException
 from database import engine, SessionLocal
+from models import User, Post
 import models
 from sqlalchemy.orm import Session
-from schemas import UserCreate, UserLogin
+from schemas import UserCreate, UserLogin, postCreate, PostResponse
 from auth import hash_password, verify_password, create_access_token, get_current_user
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import DateTime
@@ -34,7 +35,7 @@ def get_db():
 #Get all users in swagger for temp testing
 @app.get("/users")
 def read_users(db: Session = Depends(get_db)):
-    users = db.query(models.User).all()
+    users = db.query(User).all()
     return users
 
 #register endpoint
@@ -66,7 +67,7 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
 #login endpoint
 @app.post("/login")
 def login(user: UserLogin, db: Session = Depends(get_db)):
-    db_user = db.query(models.User).filter(models.User.email == user.email).first()
+    db_user = db.query(User).filter(User.email == user.email).first()
 
     if not db_user or not verify_password(user.password, db_user.password):
         raise HTTPException(status_code=400, detail="Invalid credentials")
@@ -81,7 +82,7 @@ def login(user: UserLogin, db: Session = Depends(get_db)):
 #delete user endpoint
 @app.delete("/user/{email}")
 def delete_user(email: str, db : Session = Depends(get_db)):
-    db_user = db.query(models.User).filter(models.User.email == email).first()
+    db_user = db.query(User).filter(User.email == email).first()
 
     if not db_user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -95,4 +96,26 @@ def delete_user(email: str, db : Session = Depends(get_db)):
 @app.get("/protected")
 def protected(user_id: int = Depends(get_current_user)):
     return {"message": f"Hello user {user_id}"}
+
+
+
+
+################################################################
+
+#post creation endpoint
+@app.post("/posts/", response_model=PostResponse)
+def create_post(
+    post: postCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    new_post = Post(
+        **post.dict(),
+        user_id=current_user.id
+    )
+    db.add(new_post)
+    db.commit()
+    db.refresh(new_post)
+    return new_post
+    
 
