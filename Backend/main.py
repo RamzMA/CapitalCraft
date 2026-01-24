@@ -3,7 +3,7 @@ from database import engine, SessionLocal
 from models import User, Post
 import models
 from sqlalchemy.orm import Session
-from schemas import UserCreate, UserLogin, PostCreate, PostResponse, PublicPost, PostUpdate
+from schemas import UserCreate, UserLogin, PostCreate, PostResponse, PublicPost, PostUpdate, PostCountResponse
 from auth import hash_password, verify_password, create_access_token, get_current_user
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import DateTime
@@ -197,3 +197,12 @@ def delete_post(
     db.delete(post)
     db.commit()
     return {"message": "Post deleted successfully"}
+
+
+#post count endpoint
+@app.get("/posts/count", response_model=PostCountResponse)
+def get_post_count(
+    db: Session = Depends(get_db)
+):
+    count = db.query(Post).count()
+    return {"post_count": count}

@@ -48,3 +48,7 @@ class PostResponse(PostBase):
     #orm mode to work with sqlalchemy models
     class Config:
         from_attributes = True
+
+#Post count schema
+class PostCountResponse(BaseModel):
+    post_count: int
