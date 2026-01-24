@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react"
 import { TrendingUp, Clock, User, Plus, UserCircle, LogOut as LogOutIcon } from "lucide-react"
 
+
 type Post = {
   id: number
   content: string
   author_email: string
   created_at: string
+  likes: number
 }
 
 export default function Feed() {
@@ -76,6 +78,8 @@ export default function Feed() {
   function toggleProfileMenu() {
     setProfileMenuOpen(!profileMenuOpen)
   }
+
+
   
   return (
     <div className="min-h-screen bg-black">

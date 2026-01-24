@@ -22,7 +22,7 @@ class PostOut(BaseModel):
 
     #Easy conversion from ORM objects for sqlalchemy
     class Config:
-        orm_mode = True
+       from_attributes =  True
 
 #Schemas for comment creation
 class CommentCreate(BaseModel):
@@ -34,9 +34,9 @@ class CommentOut(BaseModel):
     user_id: int
     post_id: int
 
-    #Easy conversion from ORM objects for sqlalchemy as post creation
+    #Easy conversion from ORM objects for sqlalchemy
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 #Schema for Post feed output with author email and timestamp
@@ -47,4 +47,5 @@ class PostFeedOut(BaseModel):
     created_at: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
+        
