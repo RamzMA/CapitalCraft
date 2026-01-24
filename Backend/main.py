@@ -106,9 +106,17 @@ def protected(user_id: int = Depends(get_current_user)):
 #Get all posts endpoint
 @app.get("/posts", response_model=list[PublicPost])
 def get_posts(
+    skip: int = 0,
+    limit: int = 10,
     db: Session = Depends(get_db)
 ):
-    posts = db.query(Post).all()
+    posts = (
+         db.query(Post)
+         .order_by(Post.created_at.desc())
+        .offset(skip)
+        .limit(limit)
+        .all()
+    )
     return posts
 
 
