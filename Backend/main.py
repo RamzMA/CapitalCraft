@@ -3,11 +3,12 @@ from database import engine, SessionLocal
 from models import User, Post
 import models
 from sqlalchemy.orm import Session
-from schemas import UserCreate, UserLogin, postCreate, PostResponse
+from schemas import UserCreate, UserLogin, PostCreate, PostResponse, PublicPost, PostUpdate
 from auth import hash_password, verify_password, create_access_token, get_current_user
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import DateTime
 from datetime import datetime
+from starlette import status
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -102,10 +103,21 @@ def protected(user_id: int = Depends(get_current_user)):
 
 ################################################################
 
+#Get all posts endpoint
+@app.get("/posts", response_model=list[PublicPost])
+def get_posts(
+    db: Session = Depends(get_db)
+):
+    posts = db.query(Post).all()
+    return posts
+
+
+
+
 #post creation endpoint
-@app.post("/posts/", response_model=PostResponse)
+@app.post("/posts", response_model=PostResponse)
 def create_post(
-    post: postCreate,
+    post: PostCreate,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
@@ -119,3 +131,69 @@ def create_post(
     return new_post
     
 
+
+#edit post endpoint
+@app.put("/posts/{post_id}", response_model=PublicPost)
+def edit_post(
+    post_id: int,
+    post: PostUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    existing_post = (
+        db.query(Post)
+        .filter(Post.id == post_id)
+        .one_or_none()
+    )
+
+    if not existing_post:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Post not found"
+            )
+    
+    if existing_post.user_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized to edit this post"
+            )
+    
+    update_data = post.dict(exclude_unset=True)
+
+    for field, value in update_data.items():
+        setattr(existing_post, field, value)
+
+    db.commit()
+    db.refresh(existing_post)
+    return existing_post
+
+
+
+#Delete post endpoint
+@app.delete("/posts/{post_id}")
+def delete_post(
+    post_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    post = (
+        db.query(Post)
+        .filter(Post.id == post_id)
+        .one_or_none()
+    )
+
+    if not post:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Post not found"
+            )
+    
+    if post.user_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized to delete this post"
+            )
+    
+    db.delete(post)
+    db.commit()
+    return {"message": "Post deleted successfully"}

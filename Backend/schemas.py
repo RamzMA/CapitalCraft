@@ -25,6 +25,21 @@ class PostBase(BaseModel):
 class PostCreate(PostBase):
     pass
 
+class PostUpdate(BaseModel):
+    title: Optional[str] = None
+    content: Optional[str] = None
+    image_url: Optional[str] = None
+    
+
+class PublicPost(BaseModel):
+    title: str
+    content: str
+    image_url: Optional[str] = None
+    author: str
+
+    class Config:
+        from_attributes = True
+
 #schema for postresponse using inheritance from postbase and adding id and created_at
 class PostResponse(PostBase):
     id: int
