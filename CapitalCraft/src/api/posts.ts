@@ -1,4 +1,4 @@
-import type { PublicPost} from '../types/PublicPost';
+import type { PublicPost } from '../types/PublicPost';
 
 const API_BASE_URL = "http://127.0.0.1:8000";
 
@@ -14,6 +14,39 @@ export async function fetchPost(
         throw new Error("Failed to fetch posts");
     }
 
-    return res.json();
+    const data = await res.json();
+    // Map author_name to author for compatibility with PublicPost type
+    return data.map((post: any) => ({
+        ...post,
+        author: post.author_name ?? post.author ?? "Unknown"
+    }));
 
 };
+
+
+//Create a new post
+export async function createPost(
+    title: string,
+    content: string,
+    image_url?: string
+): Promise<PublicPost> {
+    const token = localStorage.getItem("token");
+    const res = await fetch(`${API_BASE_URL}/posts`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({
+            title,
+            content,
+            image_url,
+        }),
+    });
+
+    if(!res.ok){
+        throw new Error("Failed to create post");
+    }
+
+    return res.json();
+}

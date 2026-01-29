@@ -1,9 +1,9 @@
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends, HTTPException, UploadFile, File
 from database import engine, SessionLocal
-from models import User, Post
+from models import User, Post, Comment
 import models
 from sqlalchemy.orm import Session
-from schemas import UserCreate, UserLogin, PostCreate, PostResponse, PublicPost, PostUpdate, PostCountResponse
+from schemas import UserCreate, UserLogin, PostCreate, PostResponse, PublicPost, PostUpdate, PostCountResponse, CommentCreate, CommentResponse, CommentUpdate
 from auth import hash_password, verify_password, create_access_token, get_current_user
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import DateTime
@@ -14,6 +14,31 @@ load_dotenv()
 
 # Initialize FastAPI app
 app = FastAPI()
+
+# Serve uploaded files
+from fastapi.staticfiles import StaticFiles
+import os
+UPLOAD_DIR = os.path.join(os.path.dirname(__file__), "uploads")
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
+
+# Image upload endpoint
+@app.post("/api/upload")
+async def upload_image(file: UploadFile = File(...)):
+    file_ext = os.path.splitext(file.filename)[1]
+    if file_ext.lower() not in [".jpg", ".jpeg", ".png", ".gif", ".webp"]:
+        raise HTTPException(status_code=400, detail="Invalid image type.")
+    file_path = os.path.join(UPLOAD_DIR, file.filename)
+    # Ensure unique filename
+    base, ext = os.path.splitext(file.filename)
+    counter = 1
+    while os.path.exists(file_path):
+        file_path = os.path.join(UPLOAD_DIR, f"{base}_{counter}{ext}")
+        counter += 1
+    with open(file_path, "wb") as f:
+        f.write(await file.read())
+    url = f"/uploads/{os.path.basename(file_path)}"
+    return {"url": url}
 
 # Add CORS middleware
 app.add_middleware(
@@ -111,13 +136,25 @@ def get_posts(
     db: Session = Depends(get_db)
 ):
     posts = (
-         db.query(Post)
-         .order_by(Post.created_at.desc())
+        db.query(Post)
+        .order_by(Post.created_at.desc())
         .offset(skip)
         .limit(limit)
         .all()
     )
-    return posts
+    public_posts = []
+    for post in posts:
+        author_name = "Unknown"
+        if post.user and post.user.name:
+            author_name = post.user.name
+        public_posts.append({
+            "title": post.title,
+            "content": post.content,
+            "image_url": post.image_url,
+            "created_at": post.created_at,
+            "author_name": author_name
+        })
+    return public_posts
 
 
 
@@ -131,7 +168,7 @@ def create_post(
 ):
     new_post = Post(
         **post.dict(),
-        user_id=current_user.id
+        user_id=current_user
     )
     db.add(new_post)
     db.commit()
@@ -214,3 +251,125 @@ def get_post_count(
 ):
     count = db.query(Post).count()
     return {"post_count": count}
+
+
+
+##############################################################
+
+#Get comments for a post
+@app.get("/posts/comments", response_model=list[CommentResponse])
+def get_comments(
+    post_id: int,
+    db: Session = Depends(get_db)
+):
+    comments = (
+        db.query(Comment)
+        .filter(Comment.post_id == post_id)
+        .order_by(Comment.created_at.desc())
+        .all()
+    )
+    return comments
+
+#Add comment to a post
+@app.post("/posts/comments", response_model=CommentResponse)
+def add_comment(
+    comment: CommentCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    
+
+    if not db.query(Post).filter(Post.id == comment.post_id).first():
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Post not found"
+        )
+    
+    new_comment = Comment(
+        post_id=comment.post_id,
+        content=comment.content,
+        user_id=current_user.id
+    )
+
+    db.add(new_comment)
+    db.commit()
+    db.refresh(new_comment)
+    return new_comment
+
+#Delete comment endpoint
+@app.delete("/posts/{post_id}/comments/{comment_id}")
+def delete_comment(
+    post_id: int,
+    comment_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    comment = (
+        db.query(Comment)
+        .filter(
+            Comment.id == comment_id, 
+            Comment.post_id == post_id
+            )
+        .one_or_none()
+    )
+
+    if not comment:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Comment not found"
+            )
+    
+    if comment.user_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized to delete this comment"
+            )
+    
+    db.delete(comment)
+    db.commit()
+    return {"message": "Comment deleted successfully"}
+
+#comment update endpoint
+@app.put("/posts/{post_id}/comments/{comment_id}", response_model=CommentResponse)
+def update_comment(
+    post_id: int,
+    comment_id: int,
+    comment_update: CommentUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    comment = (
+        db.query(Comment)
+        .filter(
+            Comment.id == comment_id,
+            Comment.post_id == post_id
+        )
+        .one_or_none()
+    )
+
+    if not comment:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Comment not found"
+        )
+    
+    if comment.user_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized to update this comment"
+        )
+    
+    if not comment_update.content:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No data provided"
+        )
+    
+    update_data = comment_update.dict(exclude_unset=True)
+
+    for field, value in update_data.items():
+        setattr(comment, field, value)
+
+    db.commit()
+    db.refresh(comment)
+    return comment

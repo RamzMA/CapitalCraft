@@ -18,7 +18,6 @@ class UserLogin(BaseModel):
 class PostBase(BaseModel):
     title: str
     content: str
-    author: str
     image_url: Optional[str] = None
 
 #Schema for post create using inheritance from postbase
@@ -35,7 +34,8 @@ class PublicPost(BaseModel):
     title: str
     content: str
     image_url: Optional[str] = None
-    author: str
+    created_at: datetime
+    author_name: str
 
     class Config:
         from_attributes = True
@@ -43,6 +43,9 @@ class PublicPost(BaseModel):
 #schema for postresponse using inheritance from postbase and adding id and created_at
 class PostResponse(PostBase):
     id: int
+    title: str
+    content: str
+    image_url: Optional[str] = None
     created_at: datetime
 
     #orm mode to work with sqlalchemy models
@@ -52,3 +55,31 @@ class PostResponse(PostBase):
 #Post count schema
 class PostCountResponse(BaseModel):
     post_count: int
+
+#schmema for comments
+class CommentCreate(BaseModel):
+    content: str
+
+#schema for comment response
+class CommentResponse(BaseModel):
+    id: int
+    content: str
+    created_at: datetime
+    author_name: str
+
+    class Config:
+        from_attributes = True
+
+#schema for public comments
+class PublicComment(BaseModel):
+    id: int
+    content: str
+    created_at: datetime
+    author_name: str
+
+    class Config:
+        from_attributes = True
+
+#scheme for update comment
+class CommentUpdate(BaseModel):
+    content: Optional[str] = None
