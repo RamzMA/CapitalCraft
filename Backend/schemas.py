@@ -30,12 +30,15 @@ class PostUpdate(BaseModel):
     image_url: Optional[str] = None
     
 
+
 class PublicPost(BaseModel):
+    id: int
     title: str
     content: str
     image_url: Optional[str] = None
     created_at: datetime
     author_name: str
+    user_id: int
 
     class Config:
         from_attributes = True

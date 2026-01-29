@@ -23,7 +23,7 @@ export default function Login() {
         body: JSON.stringify({ email, password }),
       })
 
-      const data: { access_token?: string; detail?: string } = await res.json()
+      const data: { access_token?: string; detail?: string; user_id?: number } = await res.json()
 
       if (!res.ok) {
         setError(data.detail ?? "Invalid credentials")
@@ -36,6 +36,10 @@ export default function Login() {
       }
 
       localStorage.setItem("token", data.access_token)
+      // Store user_id from backend response
+      if (data.user_id) {
+        localStorage.setItem("user_id", data.user_id.toString())
+      }
       navigate("/feed")
     } catch (err) {
       setError("Backend not reachable")

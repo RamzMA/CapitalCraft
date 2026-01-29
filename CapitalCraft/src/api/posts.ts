@@ -50,3 +50,19 @@ export async function createPost(
 
     return res.json();
 }
+
+
+// delete a post by ID
+export async function deletePost(postId: number): Promise<void> {
+    const token = localStorage.getItem("token");
+    const res = await fetch(`${API_BASE_URL}/posts/${postId}`, {
+        method: "DELETE",
+        headers: {
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+    });
+
+    if(!res.ok){
+        throw new Error("Failed to delete post");
+    }
+}

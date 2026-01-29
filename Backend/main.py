@@ -102,8 +102,9 @@ def login(user: UserLogin, db: Session = Depends(get_db)):
     access_token = create_access_token(data={"sub": str(db_user.id)})
     return {
         "access_token": access_token,
-        "token_type": "bearer"
-        }
+        "token_type": "bearer",
+        "user_id": db_user.id
+    }
 
 #delete user endpoint
 @app.delete("/user/{email}")
@@ -148,11 +149,13 @@ def get_posts(
         if post.user and post.user.name:
             author_name = post.user.name
         public_posts.append({
+            "id": post.id,
             "title": post.title,
             "content": post.content,
             "image_url": post.image_url,
             "created_at": post.created_at,
-            "author_name": author_name
+            "author_name": author_name,
+            "user_id": post.user_id
         })
     return public_posts
 
@@ -237,7 +240,7 @@ def delete_post(
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Not authorized to delete this post"
-            )
+        )
     
     db.delete(post)
     db.commit()
