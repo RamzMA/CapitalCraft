@@ -200,7 +200,7 @@ def edit_post(
             detail="Post not found"
             )
     
-    if existing_post.user_id != current_user.id:
+    if existing_post.user_id != current_user:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Not authorized to edit this post"
@@ -213,7 +213,19 @@ def edit_post(
 
     db.commit()
     db.refresh(existing_post)
-    return existing_post
+    # Compose response matching PublicPost schema
+    author_name = "Unknown"
+    if existing_post.user and getattr(existing_post.user, "name", None):
+        author_name = existing_post.user.name
+    return {
+        "id": existing_post.id,
+        "title": existing_post.title,
+        "content": existing_post.content,
+        "image_url": existing_post.image_url,
+        "created_at": existing_post.created_at,
+        "author_name": author_name,
+        "user_id": existing_post.user_id
+    }
 
 
 
@@ -236,7 +248,7 @@ def delete_post(
             detail="Post not found"
             )
     
-    if post.user_id != current_user.id:
+    if post.user_id != current_user:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Not authorized to delete this post"

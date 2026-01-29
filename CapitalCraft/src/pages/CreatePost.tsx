@@ -1,6 +1,5 @@
-
 import { useState, useRef } from "react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router"
 import { createPost } from "../api/posts"
 
 export function CreatePost() {
@@ -11,9 +10,8 @@ export function CreatePost() {
   const [imagePreview, setImagePreview] = useState<string>("")
   const fileInputRef = useRef<HTMLInputElement | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const navigate = useNavigate()
-
-
 
   const handleImageChange = (file: File) => {
     setImageFile(file)
@@ -39,89 +37,182 @@ export function CreatePost() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setIsSubmitting(true)
+    setError(null)
+    
     let uploadedImageUrl = imageUrl
     if (imageFile) {
       // Upload image to backend
       const formData = new FormData()
       formData.append("file", imageFile)
-    const res = await fetch("http://localhost:8000/api/upload", {
-        method: "POST",
-        body: formData,
-      });
-      if (!res.ok) {
-        setError("Image upload failed")
+      try {
+        const res = await fetch("http://localhost:8000/api/upload", {
+          method: "POST",
+          body: formData,
+        });
+        if (!res.ok) {
+          setError("Image upload failed")
+          setIsSubmitting(false)
+          return
+        }
+        const data = await res.json()
+        uploadedImageUrl = data.url
+      } catch (err: any) {
+        setError("Image upload failed: " + err.message)
+        setIsSubmitting(false)
         return
       }
-      const data = await res.json()
-      uploadedImageUrl = data.url
     }
+    
     try {
       await createPost(title, content, uploadedImageUrl || undefined)
       navigate("/feed")
     } catch (err: any) {
       setError(err.message)
+      setIsSubmitting(false)
     }
   }
 
-
   return (
-   <div className="min-h-screen flex items-center justify-center bg-linear-to-r from-black via-red-900 to-red-500 text-white">
-     <div className="bg-gray-800 p-8 rounded shadow-md w-full max-w-md">
-       <h2 className="text-2xl mb-6 text-center font-bold">Create New Post</h2>
-       {error && <p className="text-red-500 mb-4">{error}</p>}
-       <form
-         onSubmit={handleSubmit}
-       >
-         <div className="mb-4">
-           <label className="block mb-2">Title</label>
-           <input
-             type="text"
-             value={title}
-             onChange={(e) => setTitle(e.target.value)}
-             className="w-full p-2 rounded bg-gray-700 border border-gray-600"
-             required
-           />
-         </div>
-         <div className="mb-4">
-           <label className="block mb-2">Content</label>
-           <textarea
-             value={content}
-             onChange={(e) => setContent(e.target.value)}
-             className="w-full p-2 rounded bg-gray-700 border border-gray-600"
-             rows={5}
-             required
-           ></textarea>
-         </div>
-         <div className="mb-4">
-           <label className="block mb-2">Image (optional)</label>
-           <div
-             onDrop={handleDrop}
-             onDragOver={handleDragOver}
-             className="w-full p-4 border-2 border-dashed border-gray-600 rounded bg-gray-700 text-center cursor-pointer"
-             onClick={() => fileInputRef.current?.click()}
-           >
-             {imagePreview ? (
-               <img src={imagePreview} alt="Preview" className="mx-auto max-h-40" />
-             ) : (
-               <span>Drag & drop or click to select an image</span>
-             )}
-             <input
-               type="file"
-               accept="image/*"
-               ref={fileInputRef}
-               style={{ display: "none" }}
-               onChange={handleFileInput}
-             />
-           </div>
-         </div>
-         <button
-           type="submit"
-           className="w-full bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded"
-         >
-           Create Post
-         </button>
-       </form>
-     </div>
-   </div>
+    <div className="min-h-screen bg-gradient-to-br from-black via-red-950 to-black text-white">
+      {/* Header */}
+      <div className="border-b border-red-900/50 bg-black/40 backdrop-blur-sm">
+        <div className="max-w-3xl mx-auto px-4 py-6">
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={() => navigate("/feed")}
+              className="text-gray-400 hover:text-white transition-colors"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            <div className="w-2 h-8 bg-red-500 rounded"></div>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-red-300 bg-clip-text text-transparent">
+              Create New Post
+            </h1>
+          </div>
+        </div>
+      </div>
+
+      {/* Form Container */}
+      <div className="max-w-2xl mx-auto px-4 py-8">
+        <div className="bg-gradient-to-br from-gray-900 to-black border border-red-900/30 rounded-xl p-8 shadow-xl">
+          {error && (
+            <div className="mb-6 bg-red-900/20 border border-red-500 rounded-lg p-4">
+              <p className="text-red-400">{error}</p>
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Title Input */}
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Title
+              </label>
+              <input
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                className="w-full bg-black/50 border border-red-900/50 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all"
+                placeholder="Enter post title..."
+                required
+                disabled={isSubmitting}
+              />
+            </div>
+
+            {/* Content Textarea */}
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Content
+              </label>
+              <textarea
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                className="w-full bg-black/50 border border-red-900/50 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all resize-none h-40"
+                placeholder="Share your thoughts..."
+                required
+                disabled={isSubmitting}
+              ></textarea>
+            </div>
+
+            {/* Image Upload */}
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Image <span className="text-gray-500">(optional)</span>
+              </label>
+              <div
+                className="relative border-2 border-dashed border-red-900/50 rounded-lg p-8 text-center cursor-pointer hover:border-red-700/50 transition-all bg-black/30 hover:bg-black/50 group"
+                onDrop={handleDrop}
+                onDragOver={handleDragOver}
+                onClick={() => !isSubmitting && fileInputRef.current?.click()}
+              >
+                {imagePreview ? (
+                  <div className="relative">
+                    <img 
+                      src={imagePreview} 
+                      alt="Preview" 
+                      className="max-w-full h-auto mx-auto rounded-lg max-h-96 object-contain"
+                    />
+                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
+                      <p className="text-white font-medium">Click or drag to change image</p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="py-8">
+                    <svg 
+                      className="w-16 h-16 mx-auto mb-4 text-red-500/50 group-hover:text-red-500 transition-colors" 
+                      fill="none" 
+                      stroke="currentColor" 
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                    </svg>
+                    <p className="text-gray-400 mb-2">Drag & drop an image here</p>
+                    <p className="text-sm text-gray-500">or click to select a file</p>
+                  </div>
+                )}
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  className="hidden"
+                  accept="image/*"
+                  onChange={handleFileInput}
+                  disabled={isSubmitting}
+                />
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-4 pt-4">
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="flex-1 px-6 py-3 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 rounded-lg transition-all duration-200 shadow-lg shadow-red-900/50 hover:shadow-red-800/50 hover:scale-105 font-medium disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+              >
+                {isSubmitting ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Creating...
+                  </span>
+                ) : (
+                  "Create Post"
+                )}
+              </button>
+              <button
+                type="button"
+                onClick={() => navigate("/feed")}
+                disabled={isSubmitting}
+                className="px-6 py-3 bg-gray-800 hover:bg-gray-700 rounded-lg transition-all duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
   )
 }
+
+export default CreatePost

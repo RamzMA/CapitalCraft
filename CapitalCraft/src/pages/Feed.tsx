@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react"
 import { fetchPostCount } from "../api/post"
-import { fetchPost } from "../api/posts";
+import { fetchPost, deletePost } from "../api/posts";
 import type { PublicPost } from "../types/PublicPost";
-import { deletePost } from "../api/posts";
+import { Navigate } from "react-router-dom";
 
 export default function Feed() {
   // State variables for post count, loading, error, and posts
@@ -22,13 +22,6 @@ export default function Feed() {
       .then(([countData, postsData]) => {
         setPostCount(countData.post_count);
         setPosts(postsData);
-        // Debug: print posts and currentUserId
-        // @ts-ignore
-        window._debugPosts = postsData;
-        // @ts-ignore
-        window._debugCurrentUserId = currentUserId;
-        console.log('Posts:', postsData);
-        console.log('Current userId:', currentUserId);
       })
       .catch((err) => {
         setError(err.message);
@@ -68,6 +61,7 @@ export default function Feed() {
   };
 
 
+// Handle post delete
   const handleDeletePost = async (postId: number) => {
     try {
       await deletePost(postId);
@@ -77,7 +71,6 @@ export default function Feed() {
       alert("Failed to delete post: " + err.message);
     }
   }
-
   
 
   
@@ -136,16 +129,38 @@ export default function Feed() {
                   </div>
                   <span className="text-sm text-gray-400">By <span className="text-red-400 font-medium">{post.author_name}</span></span>
 
-                  
 
+
+                <div className="ml-auto p-1">
+                     {post.user_id === currentUserId && (
+                    <button
+                      className="mr-2 focus:outline-none "
+                       onClick={() => window.location.href = `/edit-post/${post.id}`}
+                    >
+                      <span className="text-sm text-white cursor-pointer p-3 bg-black rounded-lg">Edit Post</span>
+                    </button>
+                  )}
+              
                   {post.user_id === currentUserId && (
                     <button
-                      className="ml-auto focus:outline-none"
+                      className="focus:outline-none"
                       onClick={() => handleDeletePost(post.id)}
                     >
                       <span className="text-sm text-white cursor-pointer p-3 bg-red-500 rounded-lg">Delete Post</span>
                     </button>
                   )}
+                </div>
+                
+                </div>
+                
+                <div className="flex items-center mt-5 gap-2 pt-4 border-t border-red-900/30">
+                <span
+                  className="focus:outline-none"
+                  >
+                  Comments
+                </span>
+
+                
                 </div>
               </div>
             </article>
