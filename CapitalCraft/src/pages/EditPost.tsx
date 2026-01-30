@@ -1,6 +1,7 @@
 import { editPost, fetchPostById } from "../api/posts";
 import { useState, useRef, useEffect } from "react";
 import { useNavigate, useParams } from "react-router";
+import Footer from "../Components/Footer";
 
 export function EditPost() {
     const { postId } = useParams<{ postId: string }>();
@@ -218,6 +219,7 @@ export function EditPost() {
                     </form>
                 </div>
             </div>
+            <Footer />
         </div>
     );
 }

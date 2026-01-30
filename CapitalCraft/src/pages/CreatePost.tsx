@@ -1,6 +1,7 @@
 import { useState, useRef } from "react"
 import { useNavigate } from "react-router"
 import { createPost } from "../api/posts"
+import Footer from "../Components/Footer"
 
 export function CreatePost() {
   const [title, setTitle] = useState("")
@@ -211,6 +212,7 @@ export function CreatePost() {
           </form>
         </div>
       </div>
+      <Footer />
     </div>
   )
 }

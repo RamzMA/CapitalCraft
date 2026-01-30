@@ -105,7 +105,8 @@ def login(user: UserLogin, db: Session = Depends(get_db)):
     return {
         "access_token": access_token,
         "token_type": "bearer",
-        "user_id": db_user.id
+        "user_id": db_user.id,
+        "author_name": db_user.name
     }
 
 #delete user endpoint
@@ -310,7 +311,8 @@ def get_comments_restful(
             "id": comment.id,
             "content": comment.content,
             "created_at": comment.created_at,
-            "author_name": author_name
+            "author_name": author_name,
+            "user_id": comment.user_id
         })
     return comment_responses
 
@@ -346,7 +348,8 @@ def add_comment(
         "id": new_comment.id,
         "content": new_comment.content,
         "created_at": new_comment.created_at,
-        "author_name": author_name
+        "author_name": author_name,
+        "user_id": new_comment.user_id
     }
 
 #Delete comment endpoint
@@ -372,11 +375,11 @@ def delete_comment(
             detail="Comment not found"
             )
     
-    if comment.user_id != current_user.id:
+    if comment.user_id != current_user:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Not authorized to delete this comment"
-            )
+        )
     
     db.delete(comment)
     db.commit()
@@ -406,7 +409,7 @@ def update_comment(
             detail="Comment not found"
         )
     
-    if comment.user_id != current_user.id:
+    if comment.user_id != current_user:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Not authorized to update this comment"
@@ -425,4 +428,10 @@ def update_comment(
 
     db.commit()
     db.refresh(comment)
-    return comment
+    return {
+            "id": comment.id,
+            "content": comment.content,
+            "created_at": comment.created_at,
+            "author_name": comment.user.name if comment.user else "Unknown",
+            "user_id": comment.user_id
+        }

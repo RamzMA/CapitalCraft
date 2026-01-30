@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react"
 import { motion } from "motion/react"
 import { useNavigate } from "react-router-dom"
+import Footer from "../Components/Footer"
 
 
 
@@ -16,15 +17,16 @@ export default function Login() {
 
   // Login existing user
   const handleLogin = async (): Promise<void> => {
+    const lowerCaseEmail = email.toLowerCase();
     setError("")
     try {
       const res = await fetch("http://127.0.0.1:8000/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, author_name: username }),
+        body: JSON.stringify({ email: lowerCaseEmail, password, author_name: username }),
       })
 
-      const data: { access_token?: string; detail?: string; user_id?: number } = await res.json()
+      const data: { access_token?: string; detail?: string; user_id?: number; author_name?: string } = await res.json()
 
       if (!res.ok) {
         setError(data.detail ?? "Invalid credentials")
@@ -41,6 +43,11 @@ export default function Login() {
       if (data.user_id) {
         localStorage.setItem("user_id", data.user_id.toString())
       }
+      // Store author_name from backend response
+        if (data.author_name) {
+        localStorage.setItem("author_name", data.author_name)
+      }
+
       navigate("/feed")
     } catch (err) {
       setError("Backend not reachable")
@@ -48,15 +55,22 @@ export default function Login() {
   }
 
 // Register new user
-  const handleRegister = async (): Promise<void> => {
+const handleRegister = async (): Promise<void> => {
+  const lowerCaseEmail = email.toLowerCase();
   setError("");
   setMessage("");
+
+  // Validate fields before sending request
+  if (!username.trim() || !email.trim() || !password.trim()) {
+    setError("All fields are required.");
+    return;
+  }
 
   try {
     const res = await fetch("http://127.0.0.1:8000/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password, author_name: username }),
+      body: JSON.stringify({ email: lowerCaseEmail, password, author_name: username }),
     });
 
     const data = await res.json();
@@ -104,6 +118,7 @@ export default function Login() {
 
 
   return (
+    <>
     <div className="min-h-screen flex items-center justify-center bg-gray-900 relative overflow-hidden">
       {/* Animated gradient background */}
       <motion.div
@@ -231,6 +246,7 @@ export default function Login() {
           </motion.div>
         )}
 
+        {accountStatus && (
         <input
           type="text"
           placeholder="Username"
@@ -238,6 +254,7 @@ export default function Login() {
           onChange={(e) => setUsername(e.target.value)}
           className="w-full mb-4 p-3 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:border-red-500"
         />
+        )}
         <input
           type="email"
           placeholder="Email"
@@ -274,6 +291,9 @@ export default function Login() {
           {accountStatus ? "Switch to Login" : "Switch to Sign Up"}
         </button>
       </motion.div>
+    
     </div>
+    <Footer />
+    </>
   )
 }

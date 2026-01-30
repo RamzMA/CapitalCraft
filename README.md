@@ -80,10 +80,33 @@ This is **not a tutorial clone** — it is an evolving, real-world application d
 ---
 
 ## 📸 Screenshots
-Login/Register Page
-<img width="1918" height="952" alt="Screenshot 2026-01-22 at 08 06 11" src="https://github.com/user-attachments/assets/6db32c1c-21e0-492c-b6b9-78bee63d38ab" />
-Secure login and registration interface for CapitalCraft, featuring JWT-based authentication and a responsive React + Tailwind UI.
+Login
+<img width="1918" height="952" alt="Screenshot 2026-01-22 at 08 06 11" src="/ProjectImages/Login.png" />
+A secure and responsive login interface built with React and Tailwind CSS. Users authenticate using JWT‑based login, with real‑time validation and clear error handling. The layout is minimal, fast, and optimized for both desktop and mobile, ensuring a smooth entry point into the CapitalCraft platform.
 
-*(Coming soon)*
+Register Page
+<img width="1918" height="952" alt="Screenshot 2026-01-22 at 08 06 11" src="/ProjectImages/Register.png" />
+A streamlined account‑creation page that guides new users through a simple registration flow. The form includes validation for email, password strength, and required fields, all powered by a modern React + Tailwind UI. Successful registration automatically prepares the user for JWT‑based authentication and access to the main feed.
+
+Feed 1/2
+<img width="1918" height="952" alt="Screenshot 2026-01-22 at 08 06 11" src="/ProjectImages/Feed1.png" />
+The first half of the CapitalCraft feed showcases dynamic posts pulled from the backend via authenticated API calls. Users can browse updates, view market‑style posts, and interact with content in a clean, card‑based layout. The design emphasizes readability, spacing, and a modern social‑dashboard feel.
+
+Feed 2/2
+<img width="1918" height="952" alt="Screenshot 2026-01-22 at 08 06 11" src="/ProjectImages/Feed2.png" />
+The second half of the feed continues the interactive experience with additional posts, comments, and user‑generated content. It highlights the real‑time nature of the platform, including smooth transitions, responsive components, and consistent styling across the entire feed.
+
+Create Post Page
+<img width="1918" height="952" alt="Screenshot 2026-01-22 at 08 06 11" src="/ProjectImages/Create.png" />
+A dedicated interface for composing new posts. Users can enter a title and body, then submit the content through a secure, authenticated API request. The page focuses on clarity and usability, with a clean form layout, intuitive controls, and responsive design for all screen sizes.
+
+Edit Post Page
+<img width="1918" height="952" alt="Screenshot 2026-01-22 at 08 06 11" src="/ProjectImages/Edit.png" />
+An editing interface that allows users to update existing posts. The form is pre‑filled with the current post data, enabling quick adjustments and seamless saving through JWT‑protected API routes. The UI mirrors the Create Post page for consistency, ensuring a smooth editing workflow.
+
+
+
+
+
 
 

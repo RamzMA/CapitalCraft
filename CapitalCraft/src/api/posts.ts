@@ -99,7 +99,7 @@ export async function editPost(
 
 // Fetch a single post by ID
 export async function fetchPostById(postId: number): Promise<PublicPost> {
-    const res = await fetch(`${API_BASE_URL}/posts?skip=0&limit=100`); // fetch all, filter client-side (or add a backend endpoint for single post)
+    const res = await fetch(`${API_BASE_URL}/posts?skip=0&limit=100`); 
     if (!res.ok) {
         throw new Error("Failed to fetch posts");
     }

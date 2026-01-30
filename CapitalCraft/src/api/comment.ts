@@ -41,3 +41,53 @@ export async function fetchComments(
 
     return res.json();
 }   
+
+
+// Function to delete a comment by its ID
+export async function deleteComment(
+    postId: number,
+    commentId: number
+): Promise<void> {
+    const token = localStorage.getItem("token");
+    const res = await fetch(`${API_BASE_URL}/posts/${postId}/comments/${commentId}`, {
+        method: "DELETE",
+        headers: token ? { "Authorization": `Bearer ${token}` } : {},
+    });
+
+    if(!res.ok){
+        throw new Error("Failed to delete comment");
+    }
+}
+
+
+//handle comment update
+export async function updateComment(
+    postId: number,
+    commentId: number,
+    content: string
+): Promise<Comment> {
+    const token = localStorage.getItem("token");
+
+    // MY ACCESS TOKEN DOESNT WANT TO BE SENT HERE???
+    //Nvm typo myb 
+
+    if (token) {
+        console.log("Sending Authorization header (PUT):", `Bearer ${token}`);
+    } else {
+        console.log("No access token found in localStorage for PUT");
+    }
+    const res = await fetch(`${API_BASE_URL}/posts/${postId}/comments/${commentId}`, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+            ...(token ? { "Authorization": `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ content }),
+    });
+
+    if(!res.ok){
+        throw new Error("Failed to update comment");
+    }
+
+    return res.json();
+}

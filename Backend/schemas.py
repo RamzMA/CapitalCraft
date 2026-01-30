@@ -12,7 +12,6 @@ class UserCreate(BaseModel):
 
 #Schemas for user login
 class UserLogin(BaseModel):
-    author_name: str
     email: str
     password: str
 
@@ -72,6 +71,7 @@ class CommentResponse(BaseModel):
     content: str
     created_at: datetime
     author_name: str
+    user_id: int
 
     class Config:
         from_attributes = True
@@ -82,7 +82,7 @@ class PublicComment(BaseModel):
     content: str
     created_at: datetime
     author_name: str
-
+    user_id: int
     class Config:
         from_attributes = True
 
