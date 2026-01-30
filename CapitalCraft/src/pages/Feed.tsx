@@ -1,15 +1,19 @@
 import { useEffect, useState } from "react"
 import { fetchPostCount } from "../api/post"
-import { fetchPost, deletePost } from "../api/posts";
+import { fetchPost, deletePost, addComment } from "../api/posts";
 import type { PublicPost } from "../types/PublicPost";
-import { Navigate } from "react-router-dom";
+import type { Comment } from "../types/Comment";
+import { fetchComments } from "../api/comment";
 
 export default function Feed() {
+    // Track which posts have expanded comments
+    const [expandedComments, setExpandedComments] = useState<{ [postId: number]: boolean }>({});
   // State variables for post count, loading, error, and posts
   const [postCount, setPostCount] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [posts, setPosts] = useState<PublicPost[]>([]);
+  const [comments, setComments] = useState<{ [postId: number]: Comment[] }>({});
   const rawUserId = localStorage.getItem("user_id");
   const currentUserId = rawUserId ? parseInt(rawUserId, 10) : null;
 
@@ -19,9 +23,20 @@ export default function Feed() {
       fetchPostCount(),
       fetchPost(0, 10),  // Fetch first 10 posts
     ])
-      .then(([countData, postsData]) => {
+      .then(async ([countData, postsData]) => {
         setPostCount(countData.post_count);
         setPosts(postsData);
+        // Fetch comments for each post
+        const commentsObj: { [postId: number]: Comment[] } = {};
+        await Promise.all(postsData.map(async (post: PublicPost) => {
+          try {
+            const postComments = await fetchComments(post.id);
+            commentsObj[post.id] = postComments;
+          } catch {
+            commentsObj[post.id] = [];
+          }
+        }));
+        setComments(commentsObj);
       })
       .catch((err) => {
         setError(err.message);
@@ -71,6 +86,27 @@ export default function Feed() {
       alert("Failed to delete post: " + err.message);
     }
   }
+
+    const handleComment = async (postId: number) => {
+    const commentInput = document.getElementById(`comment-input-${postId}`) as HTMLTextAreaElement;
+    const content = commentInput.value.trim();
+    const commentError = document.getElementById(`comment-error-${postId}`);
+    if(!content){
+      commentError!.textContent = "No comment entered.";
+      return;
+    } else{
+      commentError!.textContent = "";
+    }
+    try {
+      await addComment(postId, content);
+      commentInput.value = "";
+      // Refresh comments for this post
+      const postComments = await fetchComments(postId);
+      setComments(prev => ({ ...prev, [postId]: postComments }));
+    } catch(err: any){
+      commentError!.textContent = "Failed to add comment: " + err.message;
+    }
+    }
   
 
   
@@ -160,7 +196,53 @@ export default function Feed() {
                   Comments
                 </span>
 
-                
+                {/* Comment Input Section */}
+                </div>
+                <div className="mt-4">
+                <p id={`comment-error-${post.id}`} className="text-red-500 text-md italic my-4"></p>
+                  <div className="flex justify-between items-center">
+                     <textarea
+                      placeholder="Write a comment"
+                      className="w-4/5 h-12 p-3 bg-black/50 border border-red-900/50 rounded-l text-white placeholder-gray-500 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all resize-none"
+                      id={`comment-input-${post.id}`}
+                    ></textarea>
+                    <button 
+                    className="w-1/5 h-12 flex items-center justify-center p-0"
+                    onClick={() => handleComment(post.id)}
+                    >
+                      <span className="text-sm text-white cursor-pointer w-full h-full flex items-center justify-center bg-red-500 rounded-r">Submit Comment</span>
+                    </button>
+                  </div>
+                  {/* Comments List */}
+                  <div className="mt-4" id={`comments-list-${post.id}`}>
+                    {comments[post.id] && comments[post.id].length > 0 ? (
+                      <>
+                        <ul className="space-y-2">
+                          {(expandedComments[post.id]
+                            ? comments[post.id]
+                            : comments[post.id].slice(0, 3)
+                          ).map((comment) => (
+                            <li key={comment.id} className="bg-black/30 border border-red-900/30 rounded p-2 text-gray-200">
+                              <span className="font-semibold text-red-400">{comment.author_name}:</span> {comment.content}
+                            </li>
+                          ))}
+                        </ul>
+                        {comments[post.id].length > 3 && (
+                          <button
+                            className="mt-2 text-white hover:underline text-sm"
+                            onClick={() => setExpandedComments(prev => ({
+                              ...prev,
+                              [post.id]: !prev[post.id]
+                            }))}
+                          >
+                            {expandedComments[post.id] ? 'Show less' : `Show more (${comments[post.id].length - 3} more)`}
+                          </button>
+                        )}
+                      </>
+                    ) : (
+                      <p className="text-gray-400 text-sm italic">No comments yet.</p>
+                    )}
+                  </div>
                 </div>
               </div>
             </article>

@@ -1,4 +1,5 @@
 import type { PublicPost } from '../types/PublicPost';
+import type { Comment } from '../types/Comment';
 
 const API_BASE_URL = "http://127.0.0.1:8000";
 
@@ -111,4 +112,23 @@ export async function fetchPostById(postId: number): Promise<PublicPost> {
     };
 }
 
+// Add a comment to a post
+export async function addComment(postId: number, content: string): Promise<Comment> {
+    const token = localStorage.getItem("token");
+    const res = await fetch(`${API_BASE_URL}/posts/comments`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({
+            post_id: postId,
+            content,
+        }),
+    });
+    if (!res.ok) {
+        throw new Error("Failed to add comment");
+    }
+    return res.json();
+}
 

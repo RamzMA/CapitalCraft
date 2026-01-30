@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom"
 
 export default function Login() {
     // State variables
+  const [username, setUsername] = useState<string>("")
   const [email, setEmail] = useState<string>("")
   const [password, setPassword] = useState<string>("")
   const [error, setError] = useState<string>("")
@@ -20,7 +21,7 @@ export default function Login() {
       const res = await fetch("http://127.0.0.1:8000/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password, author_name: username }),
       })
 
       const data: { access_token?: string; detail?: string; user_id?: number } = await res.json()
@@ -55,7 +56,7 @@ export default function Login() {
     const res = await fetch("http://127.0.0.1:8000/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ email, password, author_name: username }),
     });
 
     const data = await res.json();
@@ -230,6 +231,13 @@ export default function Login() {
           </motion.div>
         )}
 
+        <input
+          type="text"
+          placeholder="Username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          className="w-full mb-4 p-3 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:border-red-500"
+        />
         <input
           type="email"
           placeholder="Email"

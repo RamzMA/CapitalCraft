@@ -6,11 +6,13 @@ from typing import List, Optional
 
 #Schemas for user creation
 class UserCreate(BaseModel):
+    author_name: str
     email: str
     password: str
 
 #Schemas for user login
 class UserLogin(BaseModel):
+    author_name: str
     email: str
     password: str
 
@@ -61,6 +63,7 @@ class PostCountResponse(BaseModel):
 
 #schmema for comments
 class CommentCreate(BaseModel):
+    post_id: int
     content: str
 
 #schema for comment response

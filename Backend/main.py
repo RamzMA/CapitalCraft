@@ -77,6 +77,7 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
     hashed_pw = hash_password(user.password)
 
     new_user = models.User(
+        name=user.author_name,
         email=user.email,
         password=hashed_pw
     )
@@ -87,7 +88,8 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
 
     return {
         "id": new_user.id,
-        "email": new_user.email
+        "email": new_user.email,
+        "author_name": new_user.name
     }
 
 #login endpoint
@@ -271,7 +273,8 @@ def get_post_count(
 
 ##############################################################
 
-#Get comments for a post
+
+# Get comments for a post (query param version)
 @app.get("/posts/comments", response_model=list[CommentResponse])
 def get_comments(
     post_id: int,
@@ -284,6 +287,32 @@ def get_comments(
         .all()
     )
     return comments
+
+# Get comments for a post (RESTful version)
+@app.get("/posts/{post_id}/comments", response_model=list[CommentResponse])
+def get_comments_restful(
+    post_id: int,
+    db: Session = Depends(get_db)
+):
+    comments = (
+        db.query(Comment)
+        .filter(Comment.post_id == post_id)
+        .order_by(Comment.created_at.desc())
+        .all()
+    )
+    # Compose response matching CommentResponse schema
+    comment_responses = []
+    for comment in comments:
+        author_name = "Unknown"
+        if comment.user and getattr(comment.user, "name", None):
+            author_name = comment.user.name
+        comment_responses.append({
+            "id": comment.id,
+            "content": comment.content,
+            "created_at": comment.created_at,
+            "author_name": author_name
+        })
+    return comment_responses
 
 #Add comment to a post
 @app.post("/posts/comments", response_model=CommentResponse)
@@ -303,13 +332,22 @@ def add_comment(
     new_comment = Comment(
         post_id=comment.post_id,
         content=comment.content,
-        user_id=current_user.id
+        user_id=current_user
     )
 
     db.add(new_comment)
     db.commit()
     db.refresh(new_comment)
-    return new_comment
+    # Compose response matching CommentResponse schema
+    author_name = "Unknown"
+    if new_comment.user and getattr(new_comment.user, "name", None):
+        author_name = new_comment.user.name
+    return {
+        "id": new_comment.id,
+        "content": new_comment.content,
+        "created_at": new_comment.created_at,
+        "author_name": author_name
+    }
 
 #Delete comment endpoint
 @app.delete("/posts/{post_id}/comments/{comment_id}")
