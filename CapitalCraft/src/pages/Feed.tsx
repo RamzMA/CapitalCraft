@@ -5,6 +5,7 @@ import type { PublicPost } from "../types/PublicPost";
 import type { Comment } from "../types/Comment";
 import { fetchComments, deleteComment, updateComment } from "../api/comment";
 import Footer from "../Components/Footer";
+import UserIcon from "../Components/UserIcon";
 
 export default function Feed() {
       // Format comment time
@@ -198,9 +199,8 @@ export default function Feed() {
                   Create Post
                 </button>
 
-                <button
-                className="flex items-center justify-center ml-1 h-14 w-14 bg-linear-to-br from-red-600 to-red-800 rounded-full cursor-pointer hover:bg-red-700 transition"
-                >{authorName?.charAt(0).toUpperCase()}</button>
+            <UserIcon />
+                
             </div>
           
           </div>
