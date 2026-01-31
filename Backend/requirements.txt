@@ -1,16 +1,23 @@
 # Backend/requirements.txt
+
 fastapi
 uvicorn[standard]
-
-# Database
 sqlalchemy
 pydantic
 python-dotenv
+starlette
 
 # Auth & Security
 python-jose[cryptography]
+argon2-cffi
 passlib[bcrypt]
 bcrypt==3.2.2
 
-# CORS
-starlette
+# Database driver
+psycopg2-binary
+
+# Other dependencies
+python-multipart
+
+# Optional: for type hints and linting
+typing-extensions
