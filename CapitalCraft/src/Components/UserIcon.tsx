@@ -72,7 +72,7 @@ const UserIcon: React.FC = () => {
                             localStorage.removeItem("author_token");
                             window.dispatchEvent(new Event("authorNameChanged"));
                             window.location.reload();
-                            window.location.href = "/login";
+                            window.location.href = "/";
                         }}
                     >
                         Log Out
