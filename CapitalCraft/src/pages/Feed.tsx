@@ -107,7 +107,7 @@ export default function Feed() {
   const getImageUrl = (url: string) => {
     if (!url) return "";
     if (url.startsWith("/uploads")) {
-      return "http://localhost:8000" + url;
+      return "https://capitalcraft.onrender.com" + url;
     }
     return url;
   };

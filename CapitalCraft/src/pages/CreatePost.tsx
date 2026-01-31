@@ -47,7 +47,7 @@ export function CreatePost() {
       const formData = new FormData()
       formData.append("file", imageFile)
       try {
-        const res = await fetch("http://localhost:8000/api/upload", {
+        const res = await fetch("https://capitalcraft.onrender.com/api/upload", {
           method: "POST",
           body: formData,
         });
