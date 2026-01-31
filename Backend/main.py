@@ -43,7 +43,7 @@ async def upload_image(file: UploadFile = File(...)):
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["https://capitalcraft-ra.netlify.app"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
