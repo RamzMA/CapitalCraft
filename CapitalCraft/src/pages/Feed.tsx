@@ -376,8 +376,7 @@ export default function Feed() {
           </div>
         )}
       </div>
-
-      <Footer />
+         <Footer />
     </div>
   );
 }
