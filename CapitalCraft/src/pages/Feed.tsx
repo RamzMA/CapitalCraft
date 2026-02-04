@@ -39,7 +39,6 @@ export default function Feed() {
   const rawUserId = localStorage.getItem("user_id");
   const currentUserId = rawUserId ? parseInt(rawUserId, 10) : null;
   const authorName = localStorage.getItem("author_name");
-  const [offset, setOffset] = useState(0);
   const [hasMore, setHasMore] = useState(true);
 
 
@@ -66,22 +65,31 @@ export default function Feed() {
       fetchPostCount(),
       fetchPost(newOffset),
     ]);
+
     setPostCount(countData.post_count);
-    if (postsData.length === 0) {
-      setHasMore(false);
-      return;
-    }
-    setPosts(prev =>
-      newOffset === 0 ? postsData : [...prev, ...postsData]
-    );
-    const commentsObj: { [postId: number]: Comment[] } = {};
-    await Promise.all(postsData.map(async (post: PublicPost) => {
-      try {
-        commentsObj[post.id] = await fetchComments(post.id);
-      } catch {
-        commentsObj[post.id] = [];
+
+    setPosts(prev => {
+      const combined =
+        newOffset === 0 ? postsData : [...prev, ...postsData];
+
+      if (combined.length >= countData.post_count) {
+        setHasMore(false);
       }
-    }));
+
+      return combined;
+    });
+
+    const commentsObj: { [postId: number]: Comment[] } = {};
+    await Promise.all(
+      postsData.map(async (post: PublicPost) => {
+        try {
+          commentsObj[post.id] = await fetchComments(post.id);
+        } catch {
+          commentsObj[post.id] = [];
+        }
+      })
+    );
+
     setComments(prev => ({ ...prev, ...commentsObj }));
     setLoading(false);
   } catch (err: any) {
@@ -89,6 +97,7 @@ export default function Feed() {
     setLoading(false);
   }
 };
+
 
 
   // Poll every 5 seconds
@@ -396,19 +405,18 @@ useEffect(() => {
       </div>
 
       {hasMore && posts.length < postCount && (
-      <div className="text-center mt-10">
+      <div className="text-center mt-2 pb-10">
         <button
           className="px-6 py-3 bg-red-600 hover:bg-red-500 rounded-lg text-white font-semibold"
           onClick={() => {
-            const newOffset = offset + posts.length;
-            setOffset(newOffset);
-            fetchPostsAndComments(newOffset);
+            fetchPostsAndComments(posts.length);
           }}
         >
           Show more posts
         </button>
       </div>
     )}
+
       
     </div>
        <Footer />
