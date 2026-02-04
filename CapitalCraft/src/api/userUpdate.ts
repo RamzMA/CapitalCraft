@@ -1,4 +1,4 @@
-import type { Account, AccountStatus } from '../types/Account';
+import type { Account, AccountStatus, Description } from '../types/Account';
 
 const API_BASE_URL = "http://127.0.0.1:8000"
 
@@ -71,6 +71,51 @@ export async function fetchUserStatus(
 
     if(!res.ok){
         throw new Error("Failed to fetch user status");
+    }
+
+    return res.json();
+}
+
+
+//User Description Update
+export async function updateUserDescription(
+    userId: number,
+    content: string
+): Promise<Description> {
+    const token = localStorage.getItem("token");
+    const res = await fetch(`${API_BASE_URL}/user/${userId}/description`, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({
+            content: content,
+        }),
+    });
+
+    if(!res.ok){
+        throw new Error("Failed to update user description");
+    }
+
+    return res.json();
+}
+
+
+// Fetch user description
+export async function fetchUserDescription(
+    userId: number
+): Promise<Description> {
+    const token = localStorage.getItem("token");
+    const res = await fetch(`${API_BASE_URL}/user/${userId}/description`, {
+        method: "GET",
+        headers: {
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+    });
+
+    if(!res.ok){
+        throw new Error("Failed to fetch user description");
     }
 
     return res.json();

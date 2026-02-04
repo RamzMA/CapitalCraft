@@ -15,6 +15,7 @@ class User(Base):
 
     posts = relationship("Post", back_populates="user")
     comments = relationship("Comment", back_populates="user")
+    description = relationship("Description", back_populates="user", uselist=False)
 
 # Post model
 class Post(Base):
@@ -46,3 +47,14 @@ class Comment(Base):
 
     post = relationship("Post", back_populates="comments")
     user = relationship("User", back_populates="comments")
+
+class Description(Base):
+    __tablename__ = "descriptions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), unique=True)
+    content = Column(Text)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+    user = relationship("User", back_populates="description")

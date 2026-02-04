@@ -528,3 +528,64 @@ def get_user_status(
         "commentCount": comment_count,
         "created_at": created_at
     }
+
+
+###############################################
+
+# Description endpoints
+from pydantic import BaseModel
+
+class DescriptionUpdate(BaseModel):
+    content: str
+
+@app.put("/user/{user_id}/description")
+def update_description(
+    user_id: int,
+    desc_update: DescriptionUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    if user_id != current_user:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized to update this description"
+        )
+    
+    user = db.query(User).filter(User.id == current_user).one_or_none()
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+    
+
+    desc = db.query(models.Description).filter(models.Description.user_id == current_user).one_or_none()
+
+    if desc:
+        desc.content = desc_update.content
+    else:
+        desc = models.Description(
+            user_id=current_user,
+            content=desc_update.content
+        )
+        db.add(desc)
+
+    db.commit()
+    db.refresh(desc)
+
+    return {"message": "Description updated successfully"}
+
+
+#get user description endpoint
+@app.get("/user/{user_id}/description")
+def get_description(
+    user_id: int,
+    db: Session = Depends(get_db)
+):
+    desc = db.query(models.Description).filter(models.Description.user_id == user_id).one_or_none()
+
+    if not desc:
+        return {"content": ""}
+
+    return {"content": desc.content}

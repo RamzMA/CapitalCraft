@@ -1,6 +1,6 @@
 import UserIcon from "../Components/UserIcon";
 import Footer from "../Components/Footer";
-import { deleteUserAccount, fetchUserStatus} from "../api/userUpdate";
+import { deleteUserAccount, fetchUserStatus, fetchUserDescription} from "../api/userUpdate";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 
@@ -63,6 +63,21 @@ export default function Profile() {
         if (isNaN(date.getTime())) return "N/A";
         return date.toLocaleDateString();
     }
+
+
+    useEffect(() => {
+        const fetchDescription = async () => {
+            try {
+                const desc = await fetchUserDescription(userId);
+                if (desc) {
+                    setUserDescription(desc.content);
+                }
+            } catch (error) {
+                console.error("Failed to fetch description:", error);
+            }
+        };
+        fetchDescription();
+    }, [userId]);
 
     return (
     <>
@@ -166,7 +181,7 @@ export default function Profile() {
                             {/* Edit Description Button */}
                             <span
                                 className="text-blue-500 hover:text-blue-300 cursor-pointer"
-                                onClick={() => navigate("/pages/EditDescription")}
+                                onClick={() => navigate("/pages/Description")}
                             >
                                 Edit Description
                             </span>

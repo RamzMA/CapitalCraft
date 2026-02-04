@@ -104,3 +104,10 @@ class PublicComment(BaseModel):
 #scheme for update comment
 class CommentUpdate(BaseModel):
     content: Optional[str] = None
+
+#User Description Schema
+class UserDescription(BaseModel):
+    description: Optional[str] = None
+
+    class Config:
+        from_attributes = True

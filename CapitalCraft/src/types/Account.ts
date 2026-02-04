@@ -12,3 +12,10 @@ export interface AccountStatus {
     postCount: number;
     commentCount: number;
 }
+
+export interface Description {
+    id: number;
+    user_id: number;
+    content: string;
+    created_at: string;
+}
