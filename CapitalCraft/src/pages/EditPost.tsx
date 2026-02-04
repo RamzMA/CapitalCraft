@@ -23,7 +23,7 @@ export function EditPost() {
                 setTitle(data.title);
                 setContent(data.content);
                 setImageUrl(data.image_url || "");
-                setImagePreview(data.image_url ? "https://capitalcraft.onrender.com" + data.image_url : "");
+                setImagePreview(data.image_url ? "http://127.0.0.1:8000" + data.image_url : "");
                 setLoading(false);
             }
             catch (err: any) {
@@ -63,7 +63,7 @@ export function EditPost() {
             // Upload image to backend
             const formData = new FormData();
             formData.append("file", imageFile);
-            const res = await fetch("https://capitalcraft.onrender.com/api/upload", {
+            const res = await fetch("http://127.0.0.1:8000/api/upload", {
                 method: "POST",
                 body: formData,
             });

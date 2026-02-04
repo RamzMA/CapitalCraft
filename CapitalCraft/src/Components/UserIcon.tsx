@@ -37,7 +37,7 @@ const UserIcon: React.FC = () => {
 
                 <div
                     id="userPopUp"
-                    className={`w-48 left-2 bg-gray-800 p-4 rounded shadow-lg absolute right-0 mt-2 z-10 transition-all duration-300 transform 
+                    className={`w-48 left--15 bg-gray-800 p-4 rounded shadow-lg absolute right-0 mt-2 z-10 transition-all duration-300 transform 
                         ${isOpen ? 'opacity-100 scale-100 pointer-events-auto translate-y-0' : 'opacity-0 scale-95 pointer-events-none -translate-y-2'}`}
                     style={{ minWidth: '12rem', top: '3.5rem', height: 'auto' }}
                 >

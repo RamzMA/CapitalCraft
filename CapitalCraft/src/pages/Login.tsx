@@ -20,13 +20,13 @@ export default function Login() {
     const lowerCaseEmail = email.toLowerCase();
     setError("")
     try {
-      const res = await fetch("https://capitalcraft.onrender.com/login", {
+      const res = await fetch("http://127.0.0.1:8000/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: lowerCaseEmail, password, author_name: username }),
       })
 
-      const data: { access_token?: string; detail?: string; user_id?: number; author_name?: string } = await res.json()
+      const data: { access_token?: string; detail?: string; user_id?: number; author_name?: string; email?: string } = await res.json()
 
       if (!res.ok) {
         setError(data.detail ?? "Invalid credentials")
@@ -48,6 +48,10 @@ export default function Login() {
         localStorage.setItem("author_name", data.author_name)
       }
 
+      if (data.email) {
+        localStorage.setItem("author_email", data.email)
+      }
+
       navigate("/feed")
     } catch (err) {
       setError("Backend not reachable")
@@ -67,13 +71,13 @@ const handleRegister = async (): Promise<void> => {
   }
 
   try {
-    const res = await fetch("https://capitalcraft.onrender.com/register", {
+    const res = await fetch("http://127.0.0.1:8000/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email: lowerCaseEmail, password, author_name: username }),
     });
 
-    const data = await res.json();
+    const data: { detail?: string } = await res.json();
 
     if (!res.ok) {
       setError(data.detail ?? "Registration failed");

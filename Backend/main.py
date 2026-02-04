@@ -43,7 +43,7 @@ async def upload_image(file: UploadFile = File(...)):
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://capitalcraft-ra.netlify.app"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -106,7 +106,8 @@ def login(user: UserLogin, db: Session = Depends(get_db)):
         "access_token": access_token,
         "token_type": "bearer",
         "user_id": db_user.id,
-        "author_name": db_user.name
+        "author_name": db_user.name,
+        "email": db_user.email
     }
 
 #delete user endpoint

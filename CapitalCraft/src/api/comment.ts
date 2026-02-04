@@ -1,6 +1,6 @@
 import type { Comment } from '../types/Comment';
 
-const API_BASE_URL = "https://capitalcraft.onrender.com";
+const API_BASE_URL = "http://127.0.0.1:8000";
 
 // Function to create a new comment on a post
 export async function createComment(

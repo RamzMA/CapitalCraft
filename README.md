@@ -7,6 +7,10 @@ The goal is to create a **clean, secure, and scalable** space for finance-focuse
 This project is built as a **full-stack portfolio application**, emphasizing real-world architecture, authentication, and API-driven design.
 
 ---
+### Important Information
+CapitalCrafts database is hosted on NEON, whereas its frontend is hosted with netlify and finally the backend is hosted on RENDER. This creates issues with the allowing render to fully startup before backend is functional when opening the website.
+
+Please allow for atleast a minute before attempting register or login to allow RENDER to be fully functional.
 
 ## Features
 
