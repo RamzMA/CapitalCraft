@@ -29,6 +29,15 @@ const UserIcon: React.FC<UserIconProps> = ({ profileImageUrl }) => {
         window.location.href = "/";
     };
 
+    // Helper to get correct image URL for local/dev/prod
+    const getProfileImageSrc = (url: string | null) => {
+        if (!url) return "";
+        if (url.startsWith("http")) return url;
+        const isProd = typeof window !== "undefined" && window.location.hostname !== "localhost" && window.location.hostname !== "127.0.0.1";
+        const backend = isProd ? "https://capitalcraft.onrender.com" : "http://127.0.0.1:8000";
+        return backend + url;
+    };
+
     return (
         <div
             className="relative"
@@ -38,7 +47,7 @@ const UserIcon: React.FC<UserIconProps> = ({ profileImageUrl }) => {
             <button className="flex items-center justify-center h-14 w-14 bg-linear-to-br from-red-600 to-red-800 rounded-full overflow-hidden">
                 {profileImageUrl ? (
                     <img
-                        src={profileImageUrl.startsWith('http') ? profileImageUrl : `http://127.0.0.1:8000${profileImageUrl}`}
+                        src={getProfileImageSrc(profileImageUrl)}
                         alt="Profile"
                         className="w-full h-full object-cover"
                         onError={(e) => {

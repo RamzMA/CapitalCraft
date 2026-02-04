@@ -115,8 +115,11 @@ export default function Feed() {
 
   const getImageUrl = (url: string) => {
     if (!url) return "";
+    if (url.startsWith("http")) return url;
+    const isProd = typeof window !== "undefined" && window.location.hostname !== "localhost" && window.location.hostname !== "127.0.0.1";
+    const backend = isProd ? "https://capitalcraft.onrender.com" : "http://127.0.0.1:8000";
     if (url.startsWith("/uploads")) {
-      return "https://capitalcraft.onrender.com" + url;
+      return backend + url;
     }
     return url;
   };
