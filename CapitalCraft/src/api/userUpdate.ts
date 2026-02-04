@@ -1,6 +1,6 @@
 import type { Account, AccountStatus, Description, UserProfileImage} from '../types/Account';
 
-const API_BASE_URL = "http://127.0.0.1:8000"
+const API_BASE_URL = "https://capitalcraft.onrender.com"
 
 export async function updateUserDetails(
     userId: number,

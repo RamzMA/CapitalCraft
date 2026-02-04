@@ -35,7 +35,7 @@ export default function Profile() {
     const formData = new FormData();
     formData.append("file", selectedImage);
     try {
-      const res = await fetch("http://127.0.0.1:8000/api/upload", {
+      const res = await fetch("https://capitalcraft.onrender.com/api/upload", {
         method: "POST",
         body: formData,
       });
@@ -135,7 +135,7 @@ export default function Profile() {
                 <div className="w-40 h-40 bg-linear-to-br from-gray-700 to-gray-800 rounded-full overflow-hidden flex items-center justify-center text-6xl font-bold select-none border-4 border-gray-900 shadow-xl ring-2 ring-gray-700">
                   {profileImage ? (
                     <img
-                      src={profileImage.startsWith('http') ? profileImage : `http://127.0.0.1:8000${profileImage}`}
+                      src={profileImage.startsWith('http') ? profileImage : `https://capitalcraft.onrender.com${profileImage}`}
                       alt="Profile"
                       className="w-full h-full object-cover"
                       onError={e => {

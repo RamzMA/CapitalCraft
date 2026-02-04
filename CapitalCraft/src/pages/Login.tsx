@@ -20,7 +20,7 @@ export default function Login() {
     const lowerCaseEmail = email.toLowerCase();
     setError("")
     try {
-      const res = await fetch("http://127.0.0.1:8000/login", {
+      const res = await fetch("https://capitalcraft.onrender.com/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: lowerCaseEmail, password, author_name: username }),
@@ -71,7 +71,7 @@ const handleRegister = async (): Promise<void> => {
   }
 
   try {
-    const res = await fetch("http://127.0.0.1:8000/register", {
+    const res = await fetch("https://capitalcraft.onrender.com/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email: lowerCaseEmail, password, author_name: username }),
