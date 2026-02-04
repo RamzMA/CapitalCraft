@@ -3,7 +3,7 @@ from database import engine, SessionLocal
 from models import User, Post, Comment
 import models
 from sqlalchemy.orm import Session
-from schemas import UserCreate, UserLogin, PostCreate, PostResponse, PublicPost, PostUpdate, PostCountResponse, CommentCreate, CommentResponse, CommentUpdate, UserChangeDetails
+from schemas import UserCreate, UserLogin, PostCreate, PostResponse, PublicPost, PostUpdate, PostCountResponse, CommentCreate, CommentResponse, CommentUpdate, UserChangeDetails, UserStatusResponse
 from auth import hash_password, verify_password, create_access_token, get_current_user
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import DateTime
@@ -156,7 +156,7 @@ def get_posts(
             "id": post.id,
             "title": post.title,
             "content": post.content,
-            "image_url": post.image_url,
+            "member_since": post.user.created_at if post.user else "N/A",  
             "created_at": post.created_at,
             "author_name": author_name,
             "user_id": post.user_id
@@ -495,3 +495,36 @@ def change_user_details(
     }
 
 
+###############################################
+
+# User status endpoint
+@app.get("/user/{user_id}/status", response_model=UserStatusResponse)
+def get_user_status(
+    user_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    if user_id != current_user:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized to view this status"
+        )
+    
+    user = db.query(User).filter(User.id == current_user).one_or_none()
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+    
+    post_count = db.query(Post).filter(Post.user_id == current_user).count()
+    comment_count = db.query(Comment).filter(Comment.user_id == current_user).count()
+    created_at = user.created_at
+
+    return {
+        "id": user.id,
+        "postCount": post_count,
+        "commentCount": comment_count,
+        "created_at": created_at
+    }

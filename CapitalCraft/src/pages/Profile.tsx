@@ -1,8 +1,8 @@
 import UserIcon from "../Components/UserIcon";
 import Footer from "../Components/Footer";
-import { deleteUserAccount } from "../api/userUpdate";
+import { deleteUserAccount, fetchUserStatus} from "../api/userUpdate";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 
 export default function Profile() {
@@ -16,6 +16,22 @@ export default function Profile() {
     const currentUserId = localStorage.getItem("user_id") || "0";
     const userId = Number(currentUserId);
 
+
+    useEffect(() => {
+        // Fetch user status from backend
+        const fetchStatus = async () => {
+            try {
+                const status = await fetchUserStatus(userId);
+                setUserPosts(status.postCount || 0);
+                setUserComments(status.commentCount || 0);
+                setMemberSince(status.created_at || "N/A");
+            } catch (error) {
+                console.error("Failed to fetch user status:", error);
+            }
+        };
+
+        fetchStatus();
+    }, [userId]);  
 
     const handleDeleteAccount = async () => {
         if (!userEmail) {
@@ -40,6 +56,13 @@ export default function Profile() {
             alert("Failed to delete account.");
         }
     };
+
+    function formatDate(dateString: string) {
+        if (!dateString || dateString === "N/A") return "N/A";
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) return "N/A";
+        return date.toLocaleDateString();
+    }
 
     return (
     <>
@@ -171,7 +194,7 @@ export default function Profile() {
                         <p className="mb-2">Total Posts: {userPosts}</p>
                         <p className="mb-2">Total Likes: {userLikes}</p>
                         <p className="mb-2">Total Comments: {userComments}</p>
-                        <p className="mb-2">Member Since: {memberSince}</p>
+                        <p className="mb-2">Member Since: {formatDate(memberSince)}</p>
                     </div>
                 </div>
             </div>

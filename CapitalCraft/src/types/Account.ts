@@ -5,3 +5,10 @@ export interface Account {
     password_hash: string;
     created_at: string;
 }
+
+export interface AccountStatus {
+    id: number;
+    created_at: string;
+    postCount: number;
+    commentCount: number;
+}

@@ -1,4 +1,4 @@
-import type { Account } from '../types/Account';
+import type { Account, AccountStatus } from '../types/Account';
 
 const API_BASE_URL = "http://127.0.0.1:8000"
 
@@ -22,8 +22,18 @@ export async function updateUserDetails(
         }),
     });
 
-    if(!res.ok){
-        throw new Error("Failed to update user details");
+    //check status before parsing JSON
+    if (!res.ok) {
+        let errorMsg = `Failed to update user details (status ${res.status})`;
+        try {
+            const errorData = await res.json();
+            if (errorData && errorData.detail) {
+                errorMsg = errorData.detail;
+            }
+        } catch (e) {
+            console.error("Failed to parse error response as JSON", e);
+        }
+        throw new Error(errorMsg);
     }
 
     return res.json();
@@ -44,4 +54,24 @@ export async function deleteUserAccount(
     if(!res.ok){
         throw new Error("Failed to delete user account");
     }
+}
+
+
+// Fetch user status
+export async function fetchUserStatus(
+    userId: number
+): Promise<AccountStatus> {
+    const token = localStorage.getItem("token");
+    const res = await fetch(`${API_BASE_URL}/user/${userId}/status`, {
+        method: "GET",
+        headers: {
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+    });
+
+    if(!res.ok){
+        throw new Error("Failed to fetch user status");
+    }
+
+    return res.json();
 }

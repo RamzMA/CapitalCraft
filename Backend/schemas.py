@@ -20,6 +20,16 @@ class UserChangeDetails(BaseModel):
     email: Optional[str] = None
     password: Optional[str] = None
 
+class UserStatusResponse(BaseModel):
+
+    id: int
+    created_at: datetime
+    postCount: int
+    commentCount: int
+
+    class Config:
+        from_attributes = True
+
 #Schema for post creation
 class PostBase(BaseModel):
     title: str
