@@ -4,12 +4,15 @@ import type { Comment } from '../types/Comment';
 const API_BASE_URL = "https://capitalcraft.onrender.com";
 
 export async function fetchPost(
+
     skip: number = 0,
-    limit: number = 10
+    limit?: number
 ): Promise<PublicPost[]> {
-    const res = await fetch(
-        `${API_BASE_URL}/posts?skip=${skip}&limit=${limit}`
-    );
+    // If limit is undefined, fetch all posts (no limit param)
+    const url = limit === undefined ?
+      `${API_BASE_URL}/posts?skip=${skip}` :
+      `${API_BASE_URL}/posts?skip=${skip}&limit=${limit}`;
+    const res = await fetch(url);
 
     if(!res.ok){
         throw new Error("Failed to fetch posts");

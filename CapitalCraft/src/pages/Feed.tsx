@@ -39,6 +39,9 @@ export default function Feed() {
   const rawUserId = localStorage.getItem("user_id");
   const currentUserId = rawUserId ? parseInt(rawUserId, 10) : null;
   const authorName = localStorage.getItem("author_name");
+  const [offset, setOffset] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+
 
   // Profile image state
   const [profileImage, setProfileImage] = useState<string | null>(null);
@@ -57,40 +60,42 @@ export default function Feed() {
 
 
   // Fetch posts and comments for polling to ensure up-to-date content
-  const fetchPostsAndComments = async () => {
-    try {
-      const [countData, postsData] = await Promise.all([
-        fetchPostCount(),
-        fetchPost(0, 10),
-      ]);
-      setPostCount(countData.post_count);
-      setPosts(postsData);
-      // Fetch comments for each post
-      const commentsObj: { [postId: number]: Comment[] } = {};
-      await Promise.all(postsData.map(async (post: PublicPost) => {
-        try {
-          const postComments = await fetchComments(post.id);
-          commentsObj[post.id] = postComments;
-        } catch {
-          commentsObj[post.id] = [];
-        }
-      }));
-      setComments(commentsObj);
-      setLoading(false);
-    } catch (err: any) {
-      setError(err.message);
-      setLoading(false);
+  const fetchPostsAndComments = async (newOffset = 0) => {
+  try {
+    const [countData, postsData] = await Promise.all([
+      fetchPostCount(),
+      fetchPost(newOffset),
+    ]);
+    setPostCount(countData.post_count);
+    if (postsData.length === 0) {
+      setHasMore(false);
+      return;
     }
-  };
+    setPosts(prev =>
+      newOffset === 0 ? postsData : [...prev, ...postsData]
+    );
+    const commentsObj: { [postId: number]: Comment[] } = {};
+    await Promise.all(postsData.map(async (post: PublicPost) => {
+      try {
+        commentsObj[post.id] = await fetchComments(post.id);
+      } catch {
+        commentsObj[post.id] = [];
+      }
+    }));
+    setComments(prev => ({ ...prev, ...commentsObj }));
+    setLoading(false);
+  } catch (err: any) {
+    setError(err.message);
+    setLoading(false);
+  }
+};
+
 
   // Poll every 5 seconds
-  useEffect(() => {
-    fetchPostsAndComments();
-    const interval = setInterval(() => {
-      fetchPostsAndComments();
-    }, 5000);
-    return () => clearInterval(interval);
-  }, []);
+useEffect(() => {
+  fetchPostsAndComments(0);
+}, []);
+
   
   if (loading) {
     return (
@@ -194,6 +199,7 @@ export default function Feed() {
 
   
   return (
+    <>
     <div className="min-h-screen bg-linear-to-br from-black via-red-950 to-black text-white">
       {/* Header */}
       <div className="border-b border-red-900/50 bg-black/40 backdrop-blur-sm sticky top-0 z-10">
@@ -388,7 +394,24 @@ export default function Feed() {
           </div>
         )}
       </div>
-         <Footer />
+
+      {hasMore && posts.length < postCount && (
+      <div className="text-center mt-10">
+        <button
+          className="px-6 py-3 bg-red-600 hover:bg-red-500 rounded-lg text-white font-semibold"
+          onClick={() => {
+            const newOffset = offset + posts.length;
+            setOffset(newOffset);
+            fetchPostsAndComments(newOffset);
+          }}
+        >
+          Show more posts
+        </button>
+      </div>
+    )}
+      
     </div>
+       <Footer />
+       </>
   );
 }
