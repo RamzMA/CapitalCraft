@@ -493,3 +493,5 @@ def change_user_details(
         "email": user.email,
         "author_name": user.name,
     }
+
+

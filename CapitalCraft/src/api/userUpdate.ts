@@ -28,3 +28,20 @@ export async function updateUserDetails(
 
     return res.json();
 }
+
+// Delete user account
+export async function deleteUserAccount(
+    email: string
+): Promise<void> {
+    const token = localStorage.getItem("token");
+    const res = await fetch(`${API_BASE_URL}/user/${email}`, {
+        method: "DELETE",
+        headers: {
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+    });
+
+    if(!res.ok){
+        throw new Error("Failed to delete user account");
+    }
+}

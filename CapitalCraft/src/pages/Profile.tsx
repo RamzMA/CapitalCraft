@@ -1,5 +1,6 @@
 import UserIcon from "../Components/UserIcon";
 import Footer from "../Components/Footer";
+import { deleteUserAccount } from "../api/userUpdate";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 
@@ -11,7 +12,34 @@ export default function Profile() {
     const [userPosts, setUserPosts] = useState<number>(0);
     const [userComments, setUserComments] = useState<number>(0);
     const [memberSince, setMemberSince] = useState<string>("N/A");
+    const userEmail = localStorage.getItem("author_email") || "";
+    const currentUserId = localStorage.getItem("user_id") || "0";
+    const userId = Number(currentUserId);
 
+
+    const handleDeleteAccount = async () => {
+        if (!userEmail) {
+            alert("User email not found.");
+            return;
+        }
+
+        const confirmDelete = window.confirm(
+            "Are you sure you want to delete your account? This action cannot be undone."
+        );
+
+        if (!confirmDelete) {
+            return;
+        }
+
+        try {
+            await deleteUserAccount(userEmail);
+            localStorage.clear();
+            alert("Account deleted successfully.");
+            navigate("/login");
+        } catch (error) {
+            alert("Failed to delete account.");
+        }
+    };
 
     return (
     <>
@@ -159,7 +187,7 @@ export default function Profile() {
                         <div className="flex justify-center">
                               <button
                             className="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg transition cursor-pointer"
-                            onClick={() => navigate("/pages/DeleteAccount")}
+                            onClick={handleDeleteAccount}
                             >
                             Delete Account
                         </button>
