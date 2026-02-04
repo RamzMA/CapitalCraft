@@ -40,7 +40,7 @@ const UserIcon: React.FC<UserIconProps> = ({ profileImageUrl }) => {
 
     return (
         <div
-            className="relative"
+            className="relative pb-3"
             onMouseEnter={() => setIsOpen(true)}
             onMouseLeave={() => setIsOpen(false)}
         >
