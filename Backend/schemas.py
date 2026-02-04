@@ -15,6 +15,11 @@ class UserLogin(BaseModel):
     email: str
     password: str
 
+class UserChangeDetails(BaseModel):
+    author_name: Optional[str] = None
+    email: Optional[str] = None
+    password: Optional[str] = None
+
 #Schema for post creation
 class PostBase(BaseModel):
     title: str

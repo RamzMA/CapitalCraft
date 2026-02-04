@@ -3,7 +3,7 @@ from database import engine, SessionLocal
 from models import User, Post, Comment
 import models
 from sqlalchemy.orm import Session
-from schemas import UserCreate, UserLogin, PostCreate, PostResponse, PublicPost, PostUpdate, PostCountResponse, CommentCreate, CommentResponse, CommentUpdate
+from schemas import UserCreate, UserLogin, PostCreate, PostResponse, PublicPost, PostUpdate, PostCountResponse, CommentCreate, CommentResponse, CommentUpdate, UserChangeDetails
 from auth import hash_password, verify_password, create_access_token, get_current_user
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import DateTime
@@ -436,3 +436,60 @@ def update_comment(
             "author_name": comment.user.name if comment.user else "Unknown",
             "user_id": comment.user_id
         }
+
+
+##############################################
+
+# Change user details endpoint
+@app.put("/user/{user_id}/change-details")
+def change_user_details(
+    user_id: int,
+    details: UserChangeDetails,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    if user_id != current_user:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized to change these details"
+        )
+    
+    user = db.query(User).filter(User.id == current_user).one_or_none()
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        ) 
+    
+    if details.email:
+        existing = db.query(User).filter(
+            User.email == details.email,
+            User.id != current_user
+        ).first()
+        if existing:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Email already in use"
+            )
+    
+    update_data = details.dict(exclude_unset=True)
+
+    if "password" in update_data:
+        update_data["password"] = hash_password(update_data["password"])
+
+    if "author_name" in update_data:
+        update_data["name"] = update_data.pop("author_name")
+
+    for field, value in update_data.items():
+        if value is not None:
+            setattr(user, field, value)
+
+    db.commit()
+    db.refresh(user)
+
+    return {
+        "id": user.id,
+        "email": user.email,
+        "author_name": user.name,
+    }
