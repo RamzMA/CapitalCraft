@@ -111,3 +111,15 @@ class UserDescription(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+#user profile image schema
+class UserProfileImage(BaseModel):
+    image_url: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
+
+class ProfileImageUpdate(BaseModel):
+    profile_image: str

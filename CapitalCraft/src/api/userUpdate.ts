@@ -1,4 +1,4 @@
-import type { Account, AccountStatus, Description } from '../types/Account';
+import type { Account, AccountStatus, Description, UserProfileImage} from '../types/Account';
 
 const API_BASE_URL = "http://127.0.0.1:8000"
 
@@ -120,3 +120,50 @@ export async function fetchUserDescription(
 
     return res.json();
 }
+
+//get user profile image
+export async function fetchUserProfileImage(
+    userId: number
+): Promise<UserProfileImage> {
+    const token = localStorage.getItem("token");
+    const res = await fetch(`${API_BASE_URL}/user/${userId}/profile-image`, {
+        method: "GET",
+        headers: {
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+    });
+    
+    if(!res.ok){
+        throw new Error("Failed to fetch user profile image");
+    }
+    
+    return res.json();
+}
+
+// update user profile image
+export async function updateUserProfileImage(
+    userId: number,
+    imageUrl: string
+): Promise<UserProfileImage> {
+    const token = localStorage.getItem("token");
+    const res = await fetch(`${API_BASE_URL}/user/${userId}/profile-image`, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({
+            profile_image: imageUrl,
+        }),
+    });
+
+    if (!res.ok) {
+    const errorText = await res.text();
+    console.error("Profile image update error:", errorText);
+    throw new Error(errorText);
+    }
+
+    localStorage.setItem("profile_image", imageUrl ?? "");
+    return res.json();
+}
+

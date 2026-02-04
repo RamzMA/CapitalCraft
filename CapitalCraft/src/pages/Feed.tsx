@@ -6,6 +6,7 @@ import type { Comment } from "../types/Comment";
 import { fetchComments, deleteComment, updateComment } from "../api/comment";
 import Footer from "../Components/Footer";
 import UserIcon from "../Components/UserIcon";
+import { fetchUserProfileImage } from "../api/userUpdate";
 
 export default function Feed() {
       // Format comment time
@@ -28,20 +29,28 @@ export default function Feed() {
           return date.toLocaleDateString([], { month: '2-digit', year: '2-digit' });
         }
       }
-      //track expanded comments
-    const [expandedComments, setExpandedComments] = useState<{ [postId: number]: boolean }>({});
-  // State variables for post count, loading, error, and posts
+
+  const [expandedComments, setExpandedComments] = useState<{ [postId: number]: boolean }>({});
   const [postCount, setPostCount] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [posts, setPosts] = useState<PublicPost[]>([]);
   const [comments, setComments] = useState<{ [postId: number]: Comment[] }>({});
-  // Get current user ID from localStorage
   const rawUserId = localStorage.getItem("user_id");
-  // Parse user ID to number
   const currentUserId = rawUserId ? parseInt(rawUserId, 10) : null;
-  // Get author name from localStorage
   const authorName = localStorage.getItem("author_name");
+
+  // Profile image state
+  const [profileImage, setProfileImage] = useState<string | null>(null);
+
+  useEffect(() => {
+    const userId = localStorage.getItem("user_id");
+    if (userId) {
+      fetchUserProfileImage(Number(userId)).then(res => {
+        setProfileImage(res.image_url || null);
+      }).catch(() => setProfileImage(null));
+    }
+  }, []);
   
 
 
@@ -199,7 +208,7 @@ export default function Feed() {
                   Create Post
                 </button>
 
-            <UserIcon />
+            <UserIcon profileImageUrl={profileImage} />
                 
             </div>
           

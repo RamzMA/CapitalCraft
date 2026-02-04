@@ -4,6 +4,7 @@ from models import User, Post, Comment
 import models
 from sqlalchemy.orm import Session
 from schemas import UserCreate, UserLogin, PostCreate, PostResponse, PublicPost, PostUpdate, PostCountResponse, CommentCreate, CommentResponse, CommentUpdate, UserChangeDetails, UserStatusResponse
+from schemas import ProfileImageUpdate
 from auth import hash_password, verify_password, create_access_token, get_current_user
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import DateTime
@@ -151,7 +152,7 @@ def get_posts(
     for post in posts:
         author_name = "Unknown"
         if post.user and post.user.name:
-            author_name = post.user.name
+           author_name = post.user.name
         public_posts.append({
             "id": post.id,
             "title": post.title,
@@ -589,3 +590,47 @@ def get_description(
         return {"content": ""}
 
     return {"content": desc.content}
+
+
+###############################################
+#get user profile image
+@app.get("/user/{user_id}/profile-image")
+def get_profile_image(
+    user_id: int,
+    db: Session = Depends(get_db)
+):
+    user = db.query(User).filter(User.id == user_id).one_or_none()
+
+    if not user or not user.image_url:
+        return {"image_url": None}
+
+    return {"image_url": user.image_url}
+
+
+#update user profile image
+@app.put("/user/{user_id}/profile-image")
+def update_profile_image(
+    user_id: int,
+    image: ProfileImageUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    if user_id != current_user:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized to update this profile image"
+        )
+    
+    user = db.query(User).filter(User.id == current_user).one_or_none()
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+    
+    user.image_url = image.profile_image
+    db.commit()
+    db.refresh(user)
+
+    return {"message": "Profile image updated successfully"}

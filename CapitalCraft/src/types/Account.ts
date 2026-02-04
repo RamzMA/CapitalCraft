@@ -19,3 +19,10 @@ export interface Description {
     content: string;
     created_at: string;
 }
+
+export interface UserProfileImage {
+    id: number;
+    user_id: number;
+    image_url: string;
+    uploaded_at: string;
+}

@@ -21,7 +21,7 @@ import { useNavigate } from 'react-router-dom';
         return (
             <>
             <div className="flex flex-col w-full min-h-screen bg-gray-900 text-white">
-                <div className="w-full flex justify-between h-1/5 items-center p-4 border-b border-gray-700 mb-1">
+                <div className="w-full flex max-w-7xl mx-auto justify-between h-1/5 items-center p-4 border-b border-gray-700 mb-1">
                     <div>
                         <button
                             className="text-white hover:bg-gray-700 transition block cursor-pointer"
@@ -35,7 +35,7 @@ import { useNavigate } from 'react-router-dom';
                     </div>
 
                     <div>
-                        <UserIcon />
+                        <UserIcon profileImageUrl={localStorage.getItem("profile_image") || ""} />
                     </div>
                 </div>
 

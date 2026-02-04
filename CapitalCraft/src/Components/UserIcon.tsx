@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+interface UserIconProps {
+    profileImageUrl: string | null;
+}
 
-// UserIcon Component
-const UserIcon: React.FC = () => {
-
+const UserIcon: React.FC<UserIconProps> = ({ profileImageUrl }) => {
     const navigate = useNavigate();
     const [authorName, setAuthorName] = useState<string | null>(null);
     const [isOpen, setIsOpen] = useState(false);
@@ -13,73 +14,75 @@ const UserIcon: React.FC = () => {
         const updateAuthorName = () => {
             setAuthorName(localStorage.getItem("author_name"));
         };
+
         updateAuthorName();
-        window.addEventListener("storage", updateAuthorName);
         window.addEventListener("authorNameChanged", updateAuthorName);
+
         return () => {
-            window.removeEventListener("storage", updateAuthorName);
             window.removeEventListener("authorNameChanged", updateAuthorName);
         };
     }, []);
 
+    const handleLogout = () => {
+        localStorage.clear();
+        window.dispatchEvent(new Event("authorNameChanged"));
+        window.location.href = "/";
+    };
+
     return (
-        <>
-            <div className="relative"
-                onMouseEnter={() => setIsOpen(true)}
-                onMouseLeave={() => setIsOpen(false)}
+        <div
+            className="relative"
+            onMouseEnter={() => setIsOpen(true)}
+            onMouseLeave={() => setIsOpen(false)}
+        >
+            <button className="flex items-center justify-center h-14 w-14 bg-linear-to-br from-red-600 to-red-800 rounded-full overflow-hidden">
+                {profileImageUrl ? (
+                    <img
+                        src={profileImageUrl.startsWith('http') ? profileImageUrl : `http://127.0.0.1:8000${profileImageUrl}`}
+                        alt="Profile"
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                            (e.target as HTMLImageElement).src = "/default-avatar.png";
+                        }}
+                    />
+                ) : (
+                    <span className="text-xl font-bold text-white">
+                        {authorName ? authorName[0].toUpperCase() : "U"}
+                    </span>
+                )}
+            </button>
+
+            <div
+                className={`absolute right-0 mt-2 w-48 bg-gray-800 p-4 rounded shadow-lg z-10 transition-all duration-200
+                ${isOpen ? "opacity-100 scale-100" : "opacity-0 scale-95 pointer-events-none"}`}
             >
+                <p className="text-white text-sm mb-1">Logged in as</p>
+                <p className="text-white font-bold mb-3">
+                    {authorName || "Unknown"}
+                </p>
+
                 <button
-                    className="flex items-center justify-center ml-1 h-14 w-14 bg-linear-to-br from-red-600 to-red-800 rounded-full cursor-pointer hover:bg-red-700 transition hover:animate-spin"
+                    className="w-full border p-1 mb-2 hover:bg-gray-700"
+                    onClick={() => navigate("/pages/Profile")}
                 >
-                    {authorName ? authorName.charAt(0).toUpperCase() : "U"}
+                    Profile
                 </button>
 
-
-                <div
-                    id="userPopUp"
-                    className={`w-48 left--15 bg-gray-800 p-4 rounded shadow-lg absolute right-0 mt-2 z-10 transition-all duration-300 transform 
-                        ${isOpen ? 'opacity-100 scale-100 pointer-events-auto translate-y-0' : 'opacity-0 scale-95 pointer-events-none -translate-y-2'}`}
-                    style={{ minWidth: '12rem', top: '3.5rem', height: 'auto' }}
+                <button
+                    className="w-full border p-1 mb-2 hover:bg-gray-700"
+                    onClick={() => navigate("/pages/MyPosts")}
                 >
-                    <p className="text-white mb-2">Logged in as:</p>
-                    <p className="text-white font-bold">{authorName || "Unknown"}</p>
+                    My Posts
+                </button>
 
-
-                    {/* Profile Button */}
-                    <button
-                        className="text-white rounded border w-full p-1 my-2 hover:bg-gray-700 transition block cursor-pointer"
-                        onClick={() => {
-                            navigate("/pages/Profile");
-                        }}
-                    >
-                        Profile
-                    </button>
-
-                    <button
-                        className="text-white rounded border w-full p-1 hover:bg-gray-700 transition block cursor-pointer"
-                        onClick={() => {
-                            navigate("/pages/MyPosts");
-                        }}
-                    >
-                        My Posts
-                    </button>
-
-                    {/* Log Out Button */}
-                    <button
-                        className="text-white rounded block my-2 border w-full p-1 text-center bg-red-600 hover:bg-red-700 cursor-pointer"
-                        onClick={() => {
-                            localStorage.removeItem("author_name");
-                            localStorage.removeItem("author_token");
-                            window.dispatchEvent(new Event("authorNameChanged"));
-                            window.location.reload();
-                            window.location.href = "/";
-                        }}
-                    >
-                        Log Out
-                    </button>
-                </div>
+                <button
+                    className="w-full bg-red-600 p-1 hover:bg-red-700"
+                    onClick={handleLogout}
+                >
+                    Log Out
+                </button>
             </div>
-        </>
+        </div>
     );
 };
 
