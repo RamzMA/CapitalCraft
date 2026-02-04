@@ -157,6 +157,7 @@ def get_posts(
             "id": post.id,
             "title": post.title,
             "content": post.content,
+            "image_url": post.image_url,
             "member_since": post.user.created_at if post.user else "N/A",  
             "created_at": post.created_at,
             "author_name": author_name,
